@@ -22,7 +22,7 @@ export default function Navbar() {
       </Link>
       <div className="nav-links">
         <Link href="/sanctuary">Sanctuary</Link>
-        <Link href="/#music">Music</Link>
+        <Link href="/music">Music</Link>
         <Link href="/#store">Store</Link>
         <Link href="/admin">Admin (CMS)</Link>
       </div>

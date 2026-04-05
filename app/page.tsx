@@ -107,10 +107,9 @@ export default function Home() {
             {loading ? (
               <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>Summoning melodies...</p>
             ) : products.length > 0 ? (
-              products.map((product) => (
+              products.slice(0, 4).map((product) => (
                 <div className="product-card" key={product.id}>
                   <div className="product-image-wrapper">
-                    {/* Fallback to default styling if no image_url is returned */}
                     <img src={product.image_url || "/assets/album_art_1_1775220324510.png"} alt={product.name} />
                     <span className="price-tag">${(product.price_cents / 100).toFixed(2)}</span>
                   </div>
@@ -144,6 +143,15 @@ export default function Home() {
                 <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>No albums published yet. Check the Admin Dashboard.</p>
             )}
           </div>
+
+          {/* View All link — always shown below the 4 newest */}
+          {!loading && products.length > 0 && (
+            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+              <a href="/music" className="view-all-link">
+                View All Music &rarr;
+              </a>
+            </div>
+          )}
         </section>
 
         <div className="section-divider">
