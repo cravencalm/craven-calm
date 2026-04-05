@@ -105,9 +105,9 @@ h1, h2, h3, .logo {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-image: url('/assets/hero_v6.jpg?v=1');
+    background-image: url('/assets/hero_v7.png?v=1');
     background-size: cover;
-    background-position: center bottom; /* Aligned to bottom for the forest floor transition */
+    background-position: center center;
     border-bottom: none; 
 }
 
