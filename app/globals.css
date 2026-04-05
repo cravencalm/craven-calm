@@ -4,7 +4,7 @@
     --accent-color: #e3a968; /* Candlelight gold */
     --accent-hover: #f1ebd7;
     --border-color: #12121a; /* Even subtler border */
-    --card-bg: rgba(10, 10, 15, 0.95); /* Darker cards for depth */
+    --card-bg: rgba(18, 18, 30, 0.95); /* Deep twilight indigo for the boxes */
 
     --font-heading: 'Cinzel', serif;
     --font-subheading: 'IM Fell English', serif;
@@ -50,8 +50,11 @@ h1, h2, h3, .logo {
 .logo-img {
     height: 180px; /* Restored to 180px as requested */
     width: auto;
-    mix-blend-mode: normal; 
-    border-radius: 4px; /* Slight rounding for the square image */
+    mix-blend-mode: screen; /* Effectively blends the logo by making the dark navy background transparent */
+    filter: brightness(0.6) contrast(1.4) saturate(0.8); /* Darkens the background to near-black while keeping the silver details crisp */
+    mask-image: radial-gradient(circle at center, black 65%, transparent 100%); /* Feathers the edges of the logo box for a seamless blend */
+    -webkit-mask-image: radial-gradient(circle at center, black 65%, transparent 100%);
+    border-radius: 4px;
 }
 .logo {
     font-size: 1.8rem;
@@ -174,7 +177,7 @@ main {
     font-size: 1.4rem;
     padding: 1rem 0;
     border-bottom: 1px solid var(--border-color);
-    background: #151515;
+    background: #0d0d1a; /* Darker twilight indigo for the header */
 }
 
 .card-img-wrapper {
