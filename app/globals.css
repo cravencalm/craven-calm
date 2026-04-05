@@ -19,13 +19,13 @@
 
 body {
     background-color: var(--bg-color);
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/assets/twilight_music_bg.png'); /* Darkened musical twilight texture */
-    background-size: auto, 800px; /* Gradient covers, image repeats at 800px */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/assets/twilight_stone_bg.png'); /* Ancient twilight stone wall */
+    background-size: auto, 1024px; /* Larger stone scale for more natural look */
     background-repeat: repeat;
     color: var(--text-color);
     font-family: var(--font-body);
     line-height: 1.6;
-    background-attachment: fixed; /* Parallax effect for the music notation */
+    background-attachment: fixed; /* Parallax effect for the stone walls */
 }
 
 /* Typography */
