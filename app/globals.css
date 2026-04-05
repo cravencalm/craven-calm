@@ -48,10 +48,10 @@ h1, h2, h3, .logo {
 }
 
 .logo-img {
-    height: 90px; /* Doubled the size as requested */
+    height: 180px; /* Doubled the size as requested (2x current) */
     width: auto;
-    mix-blend-mode: normal; /* Transparent background logo means no need for mix-blend mode */
-    filter: drop-shadow(0 0 10px rgba(227, 169, 104, 0.2)); /* Adding a subtle gold glow */
+    mix-blend-mode: normal; 
+    border-radius: 4px; /* Slight rounding for the square image */
 }
 .logo {
     font-size: 1.8rem;
