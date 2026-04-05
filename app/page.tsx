@@ -43,8 +43,12 @@ export default function Home() {
       setLoading(false);
     }
     async function fetchVideos() {
-      const { data } = await supabase.from("featured_videos").select("*").order("sort_order", { ascending: true });
-      if (data) setFeaturedVideos(data);
+      try {
+        const { data, error } = await supabase.from("featured_videos").select("*").order("sort_order", { ascending: true });
+        if (data && !error) setFeaturedVideos(data);
+      } catch (_) {
+        // Table may not exist yet — fail silently
+      }
     }
     fetchProducts();
     fetchVideos();
