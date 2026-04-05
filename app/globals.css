@@ -48,7 +48,7 @@ h1, h2, h3, .logo {
 }
 
 .logo-img {
-    height: 90px; /* Reduced to half size (90px) as requested */
+    height: 180px; /* Restored to 180px as requested */
     width: auto;
     mix-blend-mode: normal; 
     border-radius: 4px; /* Slight rounding for the square image */
