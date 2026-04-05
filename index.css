@@ -100,7 +100,7 @@ h1, h2, h3, .logo {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-image: url('./assets/hero_v4.png');
+    background-image: url('./assets/hero_v4.png?v=2');
     background-size: cover;
     background-position: center top; /* Align to top to show the figure better */
     border-bottom: none; /* Removed border to favor the natural fade */
