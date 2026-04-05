@@ -1,10 +1,10 @@
 :root {
-    --bg-color: #0c0c12; /* Deep midnight indigo */
+    --bg-color: #07070a; /* Deep charcoal/indigo matching the forest trees */
     --text-color: #d1ccb8; /* Parchment/bone white */
     --accent-color: #e3a968; /* Candlelight gold */
     --accent-hover: #f1ebd7;
-    --border-color: #1a1a2e; /* Subtle indigo-tinted border */
-    --card-bg: rgba(12, 12, 18, 0.9); /* More opaque indigo for cards */
+    --border-color: #12121a; /* Even subtler border */
+    --card-bg: rgba(10, 10, 15, 0.95); /* Darker cards for depth */
 
     --font-heading: 'Cinzel', serif;
     --font-subheading: 'IM Fell English', serif;
