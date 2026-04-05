@@ -19,19 +19,35 @@ type Product = {
   audio_length: string;
 };
 
+type FeaturedVideo = {
+  id: number;
+  title: string;
+  youtube_url: string;
+};
+
+/** Extract YouTube video ID from a URL */
+function extractYouTubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>([]);
 
   useEffect(() => {
     async function fetchProducts() {
-      const { data, error } = await supabase.from("products").select("*").order("id", { ascending: false });
-      if (data) {
-        setProducts(data);
-      }
+      const { data } = await supabase.from("products").select("*").order("id", { ascending: false });
+      if (data) setProducts(data);
       setLoading(false);
     }
+    async function fetchVideos() {
+      const { data } = await supabase.from("featured_videos").select("*").order("sort_order", { ascending: true });
+      if (data) setFeaturedVideos(data);
+    }
     fetchProducts();
+    fetchVideos();
   }, []);
 
   const handleCheckout = async (productId: string) => {
@@ -154,27 +170,45 @@ export default function Home() {
           )}
         </section>
 
+        {/* Only show the divider + visuals section if there are videos, or always show the section */}
         <div className="section-divider">
           <span className="ornament left">&#10086;</span>
           <h2>Featured Visuals</h2>
           <span className="ornament right">&#10086;</span>
         </div>
 
-        <section style={{ display: "flex", justifyContent: "center", marginBottom: "4rem" }}>
-          <div style={{ width: "100%", maxWidth: "800px", padding: "10px", background: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "0 10px 30px rgba(0,0,0,0.8)" }}>
-             <iframe 
-                width="100%" 
-                height="450" 
-                src="https://www.youtube.com/embed/YPAsG5iXafE?autoplay=0&controls=1&showinfo=0&rel=0" 
-                title="Craven Calm - Gothic Ambience" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                style={{ border: "none" }}
-             ></iframe>
-          </div>
+        <section style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2rem", marginBottom: "4rem", padding: "0 4%" }}>
+          {featuredVideos.length > 0 ? (
+            featuredVideos.map((video) => {
+              const videoId = extractYouTubeId(video.youtube_url);
+              if (!videoId) return null;
+              return (
+                <div key={video.id} style={{ width: "100%", maxWidth: "800px" }}>
+                  {video.title && (
+                    <h3 style={{ fontFamily: "var(--font-heading)", color: "var(--accent-color)", marginBottom: "0.75rem", textAlign: "center", fontSize: "1.1rem", letterSpacing: "0.08em" }}>
+                      {video.title}
+                    </h3>
+                  )}
+                  <div style={{ padding: "10px", background: "var(--card-bg)", border: "1px solid var(--border-color)", boxShadow: "0 10px 30px rgba(0,0,0,0.8)" }}>
+                    <iframe
+                      width="100%"
+                      height="450"
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&showinfo=0&rel=0`}
+                      title={video.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ border: "none", display: "block" }}
+                    />
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p style={{ fontStyle: "italic", color: "var(--text-color)", opacity: 0.5 }}>
+              No featured videos yet — add some via the Admin CMS.
+            </p>
+          )}
         </section>
-
-
 
         <NewsletterForm />
       </main>
