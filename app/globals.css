@@ -100,15 +100,15 @@ h1, h2, h3, .logo {
 /* Hero Section */
 .hero {
     position: relative;
-    height: 75vh; /* Increased height for the new cinematic image */
+    height: 75vh; 
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-image: url('/assets/hero_v5.png?v=3');
+    background-image: url('/assets/hero_v6.jpg?v=1');
     background-size: cover;
-    background-position: center top; /* Align to top to show the figure better */
-    border-bottom: none; /* Removed border to favor the natural fade */
+    background-position: center bottom; /* Aligned to bottom for the forest floor transition */
+    border-bottom: none; 
 }
 
 .hero::after {
