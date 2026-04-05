@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craven Calm - Gothic Music & Relaxation</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&family=Almendra:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo-link">
+            <!-- We assume the user placed their hero-logo.png here earlier per their request -->
+            <img src="./assets/hero-logo.png" alt="Craven Calm Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
+            <div id="fallback-logo" class="logo" style="display:none;">cravencalm.com</div>
+        </a>
+        <div class="nav-links">
+            <a href="#music">Music</a>
+            <a href="#store">Store</a>
+            <a href="#about">About</a>
+            <button class="nav-btn">Create Account</button>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Calm & Gothic Music for the Soul</h1>
+            <div class="hero-divider"></div>
+            <p class="hero-subtitle">Find Your Inner Peace</p>
+        </div>
+    </header>
+
+    <main>
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3 class="card-title">Relax & Unwind</h3>
+                    <div class="card-img-wrapper">
+                        <img src="./assets/album_art_1_1775220324510.png" alt="Relax">
+                    </div>
+                    <p class="card-text">Their gentle tones lay soft harmonic shadows around your mind, casting a calming aura to tame turbulent feelings and quiet the noise.</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="card-title">Focus & Study</h3>
+                    <div class="card-img-wrapper">
+                        <img src="./assets/album_art_2_1775220414504.png" alt="Focus">
+                    </div>
+                    <p class="card-text">The sounds layer deep atmospheres helping your mind navigate complex concepts seamlessly without disruption from the outside world.</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="card-title">Meditate in Darkness</h3>
+                    <div class="card-img-wrapper">
+                        <!-- Reusing placeholder image -->
+                        <img src="./assets/album_art_1_1775220324510.png" alt="Meditate"> 
+                    </div>
+                    <p class="card-text">Our deep tones dive directly downward letting you reach powerful meditative states, inner stillness, and absolute tranquility.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider">
+            <span class="ornament left">&#10086;</span>
+            <h2>Latest Releases</h2>
+            <span class="ornament right">&#10086;</span>
+        </div>
+
+        <section class="releases-section">
+            <div class="products-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="./assets/album_art_1_1775220324510.png" alt="Release 1">
+                        <span class="price-tag">$9.00</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>Midnight Library Study</h3>
+                        <p class="sub-text">Deep Cello & Rain</p>
+                        <button class="btn-buy stripe-buy" data-product="Midnight Library">Buy MP3</button>
+                    </div>
+                </div>
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="./assets/album_art_2_1775220414504.png" alt="Release 2">
+                        <span class="price-tag">$9.00</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>Vintage Quill ASMR</h3>
+                        <p class="sub-text">Parchment & Clock Ticks</p>
+                        <button class="btn-buy stripe-buy" data-product="Vintage Quill">Buy MP3</button>
+                    </div>
+                </div>
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="./assets/album_art_1_1775220324510.png" alt="Release 3">
+                        <span class="price-tag">$9.00</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>Catacombs Ambience</h3>
+                        <p class="sub-text">Ethereal Drones</p>
+                        <button class="btn-buy stripe-buy" data-product="Catacombs">Buy MP3</button>
+                    </div>
+                </div>
+                <!-- Product 4 -->
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <img src="./assets/album_art_2_1775220414504.png" alt="Release 4">
+                        <span class="price-tag">$9.00</span>
+                    </div>
+                    <div class="product-info">
+                        <h3>Candlelight Sanctuary</h3>
+                        <p class="sub-text">Choir & Chimes</p>
+                        <button class="btn-buy stripe-buy" data-product="Candlelight">Buy MP3</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="newsletter-section">
+            <button class="btn-action">Join Our Newsletter</button>
+            <button class="btn-action">Subscribe</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Craven Calm. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
