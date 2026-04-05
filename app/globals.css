@@ -19,8 +19,8 @@
 
 body {
     background-color: var(--bg-color);
-    background-image: url('/assets/twilight_music_bg.png'); /* New musical twilight texture */
-    background-size: 800px; /* Slightly larger for the parchment feel */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/assets/twilight_music_bg.png'); /* Darkened musical twilight texture */
+    background-size: auto, 800px; /* Gradient covers, image repeats at 800px */
     background-repeat: repeat;
     color: var(--text-color);
     font-family: var(--font-body);
