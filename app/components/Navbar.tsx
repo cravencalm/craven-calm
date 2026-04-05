@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
       <Link href="/" className="logo-link">
         <img
-          src="/assets/hero-logo.png"
+          src="/assets/logo_v2.png?v=1"
           alt="Craven Calm Logo"
           className="logo-img"
           onError={(e) => {

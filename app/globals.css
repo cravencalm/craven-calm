@@ -35,13 +35,12 @@ h1, h2, h3, .logo {
     font-weight: 700;
 }
 
-/* Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 4%;
-    background: linear-gradient(to bottom, #111 0%, transparent 100%);
+    padding: 1.5rem 4%; /* Increased padding for the larger logo */
+    background: linear-gradient(to bottom, #07070a 0%, transparent 100%); /* Twilight indigo top */
     border-bottom: 2px solid var(--border-color);
     box-shadow: 0 4px 20px rgba(0,0,0,0.8);
     position: relative;
@@ -49,8 +48,10 @@ h1, h2, h3, .logo {
 }
 
 .logo-img {
-    height: 45px;
-    mix-blend-mode: lighten;
+    height: 90px; /* Doubled the size as requested */
+    width: auto;
+    mix-blend-mode: normal; /* Transparent background logo means no need for mix-blend mode */
+    filter: drop-shadow(0 0 10px rgba(227, 169, 104, 0.2)); /* Adding a subtle gold glow */
 }
 .logo {
     font-size: 1.8rem;
