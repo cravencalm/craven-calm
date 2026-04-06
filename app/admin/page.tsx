@@ -149,27 +149,55 @@ export default function AdminDashboard() {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus("Validating product details...");
+    
+    // 1. Basic Validation
+    const priceNum = Number(productPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setStatus("❌ Invalid price. Please enter a positive number.");
+      return;
+    }
+
+    if (isPhysical && (!gelatoUid || !gelatoFileUrl)) {
+      setStatus("❌ For physical products, both Gelato UID and Print File URL are required.");
+      return;
+    }
+
     setStatus("Saving product to database...");
     const payload = { 
       name: productName, 
-      price_cents: Math.round(Number(productPrice) * 100), 
-      youtube_id: youtubeId, 
-      audio_length: audioLength, 
-      mp3_preview_url: mp3Url, 
-      zip_file_url: zipUrl, 
-      image_url: imageUrl,
+      price_cents: Math.round(priceNum * 100), 
+      youtube_id: youtubeId || null, 
+      audio_length: audioLength || null, 
+      mp3_preview_url: mp3Url || null, 
+      zip_file_url: zipUrl || null, 
+      image_url: imageUrl || null,
       is_physical: isPhysical,
       gelato_uid: isPhysical ? gelatoUid : null,
       gelato_file_url: isPhysical ? gelatoFileUrl : null
     };
+
+    console.log("Saving payload:", payload);
     if (editingId) {
       const { error } = await supabase.from('products').update(payload).eq("id", editingId);
-      if (error) setStatus(`Failed to update: ${error.message}`);
-      else { setStatus(`Product "${productName}" updated successfully!`); fetchProducts(); resetForm(); }
+      if (error) {
+        console.error("Supabase Save Error:", error);
+        setStatus(`❌ Database error: ${error.message}${error.hint ? ` (${error.hint})` : ""}`);
+      } else { 
+        setStatus(`✅ Product "${productName}" updated successfully!`); 
+        fetchProducts(); 
+        resetForm(); 
+      }
     } else {
       const { error } = await supabase.from('products').insert([payload]);
-      if (error) setStatus(`Failed to save: ${error.message}`);
-      else { setStatus(`Product "${productName}" created successfully!`); fetchProducts(); resetForm(); }
+      if (error) {
+        console.error("Supabase Save Error:", error);
+        setStatus(`❌ Database error: ${error.message}${error.hint ? ` (${error.hint})` : ""}`);
+      } else { 
+        setStatus(`✅ Product "${productName}" created successfully!`); 
+        fetchProducts(); 
+        resetForm(); 
+      }
     }
   };
 
