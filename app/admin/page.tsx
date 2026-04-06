@@ -174,6 +174,13 @@ export default function AdminDashboard() {
     else { setVideoStatus(`Removed "${title}".`); fetchVideos(); }
   };
 
+  const handleDeleteSubscriber = async (id: number, email: string) => {
+    if (!confirm(`Remove "${email}" from the subscriber list?`)) return;
+    const { error } = await supabase.from("subscribers").delete().eq("id", id);
+    if (error) alert(`Failed to delete: ${error.message}`);
+    else fetchSubscribers();
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true); setAuthError("");
@@ -353,6 +360,7 @@ export default function AdminDashboard() {
                 <tr>
                   <th style={{ textAlign: "left", padding: "1rem" }}>Email Address</th>
                   <th style={{ textAlign: "right", padding: "1rem" }}>Signed Up On</th>
+                  <th style={{ textAlign: "right", padding: "1rem" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -360,6 +368,14 @@ export default function AdminDashboard() {
                   <tr key={s.id} style={{ borderBottom: "1px solid #222" }}>
                     <td style={{ padding: "0.8rem 1rem", color: "var(--accent-color)" }}>{s.email}</td>
                     <td style={{ padding: "0.8rem 1rem", textAlign: "right", opacity: 0.6 }}>{new Date(s.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: "0.8rem 1rem", textAlign: "right" }}>
+                      <button 
+                        onClick={() => handleDeleteSubscriber(s.id, s.email)}
+                        style={{ background: "transparent", color: "#f44336", border: "1px solid #f44336", padding: "0.2rem 0.6rem", cursor: "pointer", fontSize: "0.75rem", fontFamily: "var(--font-heading)" }}
+                      >
+                        Remove
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
