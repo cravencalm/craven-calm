@@ -13,6 +13,9 @@ type Product = {
   zip_file_url: string | null;
   image_url: string | null;
   audio_length: string | null;
+  is_physical?: boolean;
+  gelato_uid?: string | null;
+  gelato_file_url?: string | null;
 };
 
 type FeaturedVideo = {
@@ -46,6 +49,11 @@ export default function AdminDashboard() {
   const [mp3Url, setMp3Url] = useState("");
   const [zipUrl, setZipUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+
+  // Gelato / Physical state
+  const [isPhysical, setIsPhysical] = useState(false);
+  const [gelatoUid, setGelatoUid] = useState("");
+  const [gelatoFileUrl, setGelatoFileUrl] = useState("");
 
   // Featured Videos state
   const [videos, setVideos] = useState<FeaturedVideo[]>([]);
@@ -108,14 +116,17 @@ export default function AdminDashboard() {
       setZipUrl(product.zip_file_url || "");
       setImageUrl(product.image_url || "");
       setAudioLength(product.audio_length || "");
+      setIsPhysical(product.is_physical || false);
+      setGelatoUid(product.gelato_uid || "");
+      setGelatoFileUrl(product.gelato_file_url || "");
     } else {
       resetForm();
     }
   };
 
   const resetForm = () => {
-    setEditingId(null); setProductName(""); setProductPrice("");
     setYoutubeId(""); setAudioLength(""); setMp3Url(""); setZipUrl(""); setImageUrl("");
+    setIsPhysical(false); setGelatoUid(""); setGelatoFileUrl("");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: "mp3" | "zip" | "image") => {
@@ -139,7 +150,18 @@ export default function AdminDashboard() {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("Saving product to database...");
-    const payload = { name: productName, price_cents: Math.round(Number(productPrice) * 100), youtube_id: youtubeId, audio_length: audioLength, mp3_preview_url: mp3Url, zip_file_url: zipUrl, image_url: imageUrl };
+    const payload = { 
+      name: productName, 
+      price_cents: Math.round(Number(productPrice) * 100), 
+      youtube_id: youtubeId, 
+      audio_length: audioLength, 
+      mp3_preview_url: mp3Url, 
+      zip_file_url: zipUrl, 
+      image_url: imageUrl,
+      is_physical: isPhysical,
+      gelato_uid: isPhysical ? gelatoUid : null,
+      gelato_file_url: isPhysical ? gelatoFileUrl : null
+    };
     if (editingId) {
       const { error } = await supabase.from('products').update(payload).eq("id", editingId);
       if (error) setStatus(`Failed to update: ${error.message}`);
@@ -263,6 +285,30 @@ export default function AdminDashboard() {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>External ZIP File Link (Google Drive, Dropbox, etc.)</label>
             <input type="url" value={zipUrl} onChange={e => setZipUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
             {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>Link attached!</p>}
+          </div>
+
+          <div style={{ padding: "1.5rem", background: isPhysical ? "#121216" : "#0d0d0f", border: `1px solid ${isPhysical ? "var(--accent-color)" : "#333"}`, transition: "all 0.3s ease" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: isPhysical ? "1.5rem" : "0" }}>
+              <input type="checkbox" id="isPhysical" checked={isPhysical} onChange={e => setIsPhysical(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+              <label htmlFor="isPhysical" style={{ fontSize: "1.1rem", fontWeight: "bold", cursor: "pointer", color: isPhysical ? "var(--accent-color)" : "inherit" }}>
+                Physical Product (Fulfill via Gelato)
+              </label>
+            </div>
+            
+            {isPhysical && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "1rem", borderTop: "1px solid #333", paddingTop: "1.5rem" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem" }}>Gelato Product UID</label>
+                  <input required={isPhysical} value={gelatoUid} onChange={e => setGelatoUid(e.target.value)} placeholder="e.g. framed_poster_300x450-mm_black_aluminum_ver" style={inputStyle} />
+                  <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Find this in your Gelato Product Catalog dashboard.</p>
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.5rem" }}>High-Res Print File URL (Google Drive)</label>
+                  <input required={isPhysical} type="url" value={gelatoFileUrl} onChange={e => setGelatoFileUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
+                  <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Standard Google Drive links will be automatically converted to direct download links during fulfillment.</p>
+                </div>
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
             <button type="submit" className="btn-action" disabled={!productName || !productPrice}>{editingId ? "Update Product" : "Save New Product"}</button>

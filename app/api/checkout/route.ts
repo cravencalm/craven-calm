@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "link"], // link enables Google Pay / Apple Pay / Link processing
+      payment_method_types: ["card", "link"],
       line_items: [
         {
           price_data: {
@@ -43,7 +43,9 @@ export async function POST(request: Request) {
             product_data: {
               name: product.name,
               images: product.image_url ? [product.image_url] : [],
-              description: "Craven Calm High-Quality Digital Download (MP3/ZIP)",
+              description: product.is_physical 
+                ? "Physical Metal-Framed Poster (Global Shipping)" 
+                : "Craven Calm High-Quality Digital Download (MP3/ZIP)",
             },
             unit_amount: typeof product.price_cents === "number" ? product.price_cents : 900,
           },
@@ -53,6 +55,29 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: `${origin}/checkout-success?session_id={CHECKOUT_SESSION_ID}&product_id=${productId}`,
       cancel_url: `${origin}/`,
+      shipping_address_collection: product.is_physical ? {
+        allowed_countries: ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'DK', 'FI', 'IE', 'NO', 'SE', 'CH', 'PT', 'NZ', 'JP', 'KR', 'SG'],
+      } : undefined,
+      shipping_options: product.is_physical ? [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: 1000, // $10.00 flat fee
+              currency: 'usd',
+            },
+            display_name: 'Global Shipping',
+            delivery_estimate: {
+              minimum: { unit: 'business_day', value: 5 },
+              maximum: { unit: 'business_day', value: 15 },
+            },
+          },
+        },
+      ] : undefined,
+      metadata: {
+        productId: productId.toString(),
+        isPhysical: product.is_physical ? "true" : "false",
+      },
     });
 
     return NextResponse.json({ url: session.url });

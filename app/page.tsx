@@ -17,6 +17,7 @@ type Product = {
   zip_file_url: string;
   image_url: string;
   audio_length: string;
+  is_physical?: boolean;
 };
 
 type FeaturedVideo = {
@@ -135,9 +136,9 @@ export default function Home() {
                   </div>
                   <div className="product-info">
                     <h3>{product.name}</h3>
-                    <p className="sub-text">Craven Calm Exclusive</p>
+                    <p className="sub-text">{product.is_physical ? "Physical Metal Poster" : "Craven Calm Exclusive"}</p>
                     
-                    {product.audio_length && (
+                    {product.audio_length && !product.is_physical && (
                       <p style={{ fontSize: "0.8rem", color: "var(--accent-hover)", marginBottom: "1rem", fontStyle: "italic" }}>
                         ⏱️ {product.audio_length}
                       </p>
@@ -145,7 +146,7 @@ export default function Home() {
                     
                     {product.mp3_preview_url && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                          <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Audio Preview</p>
+                          <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>{product.is_physical ? "Artwork Preview" : "Audio Preview"}</p>
                           <AudioPlayer src={product.mp3_preview_url} />
                       </div>
                     )}
@@ -154,7 +155,7 @@ export default function Home() {
                       className="btn-buy stripe-buy"
                       onClick={() => handleCheckout(product.id.toString())}
                     >
-                      Buy MP3/ZIP
+                      {product.is_physical ? "Buy Metal Poster" : "Buy MP3/ZIP"}
                     </button>
                   </div>
                 </div>
