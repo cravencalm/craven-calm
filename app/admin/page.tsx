@@ -327,19 +327,19 @@ export default function AdminDashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "1rem", borderTop: "1px solid #333", paddingTop: "1.5rem" }}>
                 <div>
                   <label style={{ display: "block", marginBottom: "0.5rem" }}>Gelato Product UID</label>
-                  <input required={isPhysical} value={gelatoUid} onChange={e => setGelatoUid(e.target.value)} placeholder="e.g. framed_poster_300x450-mm_black_aluminum_ver" style={inputStyle} />
+                  <input value={gelatoUid} onChange={e => setGelatoUid(e.target.value)} placeholder="e.g. framed_poster_300x450-mm_black_aluminum_ver" style={inputStyle} />
                   <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Find this in your Gelato Product Catalog dashboard.</p>
                 </div>
                 <div>
                   <label style={{ display: "block", marginBottom: "0.5rem" }}>High-Res Print File URL (Google Drive)</label>
-                  <input required={isPhysical} type="url" value={gelatoFileUrl} onChange={e => setGelatoFileUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
+                  <input type="url" value={gelatoFileUrl} onChange={e => setGelatoFileUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
                   <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Standard Google Drive links will be automatically converted to direct download links during fulfillment.</p>
                 </div>
               </div>
             )}
           </div>
           <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button type="submit" className="btn-action" disabled={!productName || !productPrice}>{editingId ? "Update Product" : "Save New Product"}</button>
+            <button type="submit" className="btn-action">{editingId ? "Update Product" : "Save New Product"}</button>
             {editingId && <button type="button" onClick={() => handleSelectProduct(null)} style={{ background: "transparent", color: "#888", border: "1px solid #444", padding: "0.8rem 2.5rem", cursor: "pointer", fontFamily: "var(--font-heading)", textTransform: "uppercase" }}>Cancel Edit</button>}
           </div>
           {status && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", fontFamily: "var(--font-body)", marginTop: "1rem" }}>{status}</p>}

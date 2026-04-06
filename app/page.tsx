@@ -77,7 +77,7 @@ export default function Home() {
 
       <header className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">Calm & Gothic Music for the Soul</h1>
+          <h1 className="hero-title">Ethereal Music & Dark Academia Art for the Soul</h1>
           <div className="hero-divider"></div>
           <p className="hero-subtitle">Find Your Inner Peace</p>
         </div>
@@ -119,16 +119,16 @@ export default function Home() {
 
         <div className="section-divider" id="music">
           <span className="ornament left">&#10086;</span>
-          <h2>Latest Releases</h2>
+          <h2>Latest Music Releases</h2>
           <span className="ornament right">&#10086;</span>
         </div>
 
-        <section id="store" className="releases-section">
+        <section id="music-store" className="releases-section">
           <div className="products-grid">
             {loading ? (
               <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>Summoning melodies...</p>
-            ) : products.length > 0 ? (
-              products.slice(0, 4).map((product) => (
+            ) : products.filter(p => !p.is_physical).length > 0 ? (
+              products.filter(p => !p.is_physical).slice(0, 4).map((product) => (
                 <div className="product-card" key={product.id}>
                   <div className="product-image-wrapper">
                     <img src={product.image_url || "/assets/album_art_1_1775220324510.png"} alt={product.name} />
@@ -136,41 +136,74 @@ export default function Home() {
                   </div>
                   <div className="product-info">
                     <h3>{product.name}</h3>
-                    <p className="sub-text">{product.is_physical ? "Physical Metal Poster" : "Craven Calm Exclusive"}</p>
-                    
-                    {product.audio_length && !product.is_physical && (
+                    <p className="sub-text">Craven Calm Exclusive</p>
+                    {product.audio_length && (
                       <p style={{ fontSize: "0.8rem", color: "var(--accent-hover)", marginBottom: "1rem", fontStyle: "italic" }}>
                         ⏱️ {product.audio_length}
                       </p>
                     )}
-                    
                     {product.mp3_preview_url && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                          <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>{product.is_physical ? "Artwork Preview" : "Audio Preview"}</p>
+                          <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Audio Preview</p>
                           <AudioPlayer src={product.mp3_preview_url} />
                       </div>
                     )}
-                    
-                    <button
-                      className="btn-buy stripe-buy"
-                      onClick={() => handleCheckout(product.id.toString())}
-                    >
-                      {product.is_physical ? "Buy Metal Poster" : "Buy MP3/ZIP"}
+                    <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
+                      Buy MP3/ZIP
                     </button>
                   </div>
                 </div>
               ))
             ) : (
-                <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>No albums published yet. Check the Admin Dashboard.</p>
+                <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>No albums published yet.</p>
             )}
           </div>
-
-          {/* View All link — always shown below the 4 newest */}
-          {!loading && products.length > 0 && (
+          {!loading && products.filter(p => !p.is_physical).length > 0 && (
             <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-              <a href="/music" className="view-all-link">
-                View All Music &rarr;
-              </a>
+              <a href="/music" className="view-all-link">View All Music &rarr;</a>
+            </div>
+          )}
+        </section>
+
+        <div className="section-divider" id="artwork">
+          <span className="ornament left">&#10086;</span>
+          <h2>Ethereal Wall Art</h2>
+          <span className="ornament right">&#10086;</span>
+        </div>
+
+        <section id="art-store" className="releases-section">
+          <div className="products-grid">
+            {loading ? (
+              <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>Unveiling visions...</p>
+            ) : products.filter(p => p.is_physical).length > 0 ? (
+              products.filter(p => p.is_physical).slice(0, 4).map((product) => (
+                <div className="product-card" key={product.id}>
+                  <div className="product-image-wrapper">
+                    <img src={product.image_url || "/assets/album_art_1_1775220324510.png"} alt={product.name} />
+                    <span className="price-tag">${(product.price_cents / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="product-info">
+                    <h3>{product.name}</h3>
+                    <p className="sub-text">Physical Metal Poster</p>
+                    {product.mp3_preview_url && (
+                      <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                          <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Artwork Preview</p>
+                          <AudioPlayer src={product.mp3_preview_url} />
+                      </div>
+                    )}
+                    <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
+                      Buy Metal Poster
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+                <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>No artwork pieces available yet.</p>
+            )}
+          </div>
+          {!loading && products.filter(p => p.is_physical).length > 0 && (
+            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+              <a href="/music" className="view-all-link">View Full Gallery &rarr;</a>
             </div>
           )}
         </section>

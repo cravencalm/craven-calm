@@ -3,12 +3,12 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Craven Calm | Gothic Ambient Music & Dark Academia Relaxation",
-  description: "Immerse yourself in hauntingly beautiful gothic ambient music. Perfect for deep focus, dark academia study, and soulful relaxation. Find your inner peace in the shadows.",
-  keywords: ["gothic ambient", "dark academia music", "relaxation music", "study music", "horror ambience", "atmospheric music", "craven calm"],
+  title: "Craven Calm | Gothic Music, Ethereal Art & Dark Academia Relaxation",
+  description: "Immerse yourself in hauntingly beautiful gothic ambient music and ethereal wall art. Perfect for deep focus, dark academia study, and soulful relaxation.",
+  keywords: ["gothic music", "dark academia art", "ethereal artwork", "metal framed posters", "relaxation music", "study music", "atmospheric art", "craven calm"],
   openGraph: {
-    title: "Craven Calm | Gothic Ambient Music",
-    description: "Immerse yourself in hauntingly beautiful gothic ambient music. Perfect for focus and relaxation.",
+    title: "Craven Calm | Gothic Music & Ethereal Art",
+    description: "Immerse yourself in hauntingly beautiful gothic ambient music and ethereal dark academia art.",
     url: "https://www.cravencalm.com",
     siteName: "Craven Calm",
     images: [
