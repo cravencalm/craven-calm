@@ -22,6 +22,12 @@ type FeaturedVideo = {
   sort_order: number;
 };
 
+type Subscriber = {
+  id: number;
+  email: string;
+  created_at: string;
+};
+
 /** Extract the 11-char YouTube video ID from any common URL format */
 function extractYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
@@ -48,6 +54,10 @@ export default function AdminDashboard() {
   const [videoStatus, setVideoStatus] = useState("");
   const [videoLoading, setVideoLoading] = useState(false);
 
+  // Subscribers state
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
   const [authEmail, setAuthEmail] = useState("");
@@ -58,12 +68,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); }
-      else { setProducts([]); setVideos([]); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); }
+      else { setProducts([]); setVideos([]); setSubscribers([]); }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -78,6 +88,13 @@ export default function AdminDashboard() {
   const fetchVideos = async () => {
     const { data } = await supabase.from("featured_videos").select("*").order("sort_order", { ascending: true });
     if (data) setVideos(data);
+  };
+
+  const fetchSubscribers = async () => {
+    setSubscribersLoading(true);
+    const { data } = await supabase.from("subscribers").select("*").order("created_at", { ascending: false });
+    if (data) setSubscribers(data);
+    setSubscribersLoading(false);
   };
 
   const handleSelectProduct = (product: Product | null) => {
@@ -300,6 +317,57 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* ─── NEWSLETTER SUBSCRIBERS ─── */}
+      <div style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem", marginBottom: "4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1.5rem" }}>
+          <div>
+            <h2 style={{ marginBottom: "0.5rem" }}>📧 Newsletter Subscribers</h2>
+            <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, fontSize: "0.95rem" }}>
+              A total of {subscribers.length} souls have joined the sanctuary.
+            </p>
+          </div>
+          {subscribers.length > 0 && (
+            <button 
+              onClick={() => {
+                const emails = subscribers.map(s => s.email).join(", ");
+                navigator.clipboard.writeText(emails);
+                alert("All subscriber emails copied to clipboard!");
+              }}
+              style={{ background: "transparent", color: "var(--accent-color)", border: "1px solid var(--accent-color)", padding: "0.5rem 1rem", cursor: "pointer", fontFamily: "var(--font-heading)", fontSize: "0.8rem" }}
+            >
+              Copy All Emails
+            </button>
+          )}
+        </div>
+
+        {subscribersLoading ? (
+          <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>Loading subscribers...</p>
+        ) : subscribers.length > 0 ? (
+          <div style={{ background: "#0a0a0c", border: "1px solid #333", maxHeight: "400px", overflowY: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-body)", fontSize: "0.9rem" }}>
+              <thead style={{ background: "#111", borderBottom: "1px solid #333" }}>
+                <tr>
+                  <th style={{ textAlign: "left", padding: "1rem" }}>Email Address</th>
+                  <th style={{ textAlign: "right", padding: "1rem" }}>Signed Up On</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subscribers.map(s => (
+                  <tr key={s.id} style={{ borderBottom: "1px solid #222" }}>
+                    <td style={{ padding: "0.8rem 1rem", color: "var(--accent-color)" }}>{s.email}</td>
+                    <td style={{ padding: "0.8rem 1rem", textAlign: "right", opacity: 0.6 }}>{new Date(s.created_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ padding: "2rem", background: "#0a0a0c", border: "1px solid #333", textAlign: "center" }}>
+            <p style={{ fontStyle: "italic", color: "#666" }}>No subscribers yet.</p>
           </div>
         )}
       </div>

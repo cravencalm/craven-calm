@@ -24,7 +24,8 @@ export async function POST(request: Request) {
 
     // 2. Dispatch Welcome Email via Resend
     if (process.env.RESEND_API_KEY) {
-      const { data, error: mailError } = await resend.emails.send({
+      // Send Welcome Email to Subscriber
+      const { data: welcomeData, error: welcomeError } = await resend.emails.send({
         from: "Craven Calm <info@cravencalm.com>",
         to: [email],
         subject: "Welcome to the Sanctuary",
@@ -43,9 +44,34 @@ export async function POST(request: Request) {
         `,
       });
 
-      if (mailError) {
-        console.error("Resend delivery failed:", mailError);
-        // We still return 200 because they WERE subscribed to the DB, even if the email dropped.
+      if (welcomeError) {
+        console.error("Resend Welcome Email failed:", welcomeError);
+      } else {
+        console.log("Welcome Email sent successfully:", welcomeData?.id);
+      }
+
+      // Send Notification to Owner
+      const notificationEmail = process.env.NOTIFICATION_EMAIL;
+      if (notificationEmail) {
+        const { data: notifyData, error: notifyError } = await resend.emails.send({
+          from: "Newsletter Alert <info@cravencalm.com>",
+          to: [notificationEmail],
+          subject: "New Subscriber Joined",
+          html: `
+            <div style="padding: 20px; font-family: sans-serif;">
+              <h2>New Subscriber Alert</h2>
+              <p>A new soul has joined the newsletter:</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p>Date: ${new Date().toLocaleString()}</p>
+            </div>
+          `,
+        });
+
+        if (notifyError) {
+          console.error("Resend Owner Notification failed:", notifyError);
+        } else {
+          console.log("Owner Notification sent successfully:", notifyData?.id);
+        }
       }
     } else {
         console.warn("RESEND_API_KEY missing - user subscribed but no email sent.");
