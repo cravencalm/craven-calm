@@ -48,11 +48,11 @@ h1, h2, h3, .logo {
 }
 
 .logo-img {
-    height: 45px;
+    height: 22px;
     mix-blend-mode: lighten;
 }
 .logo {
-    font-size: 1.8rem;
+    font-size: 0.9rem;
     color: var(--text-color);
 }
 
@@ -100,9 +100,9 @@ h1, h2, h3, .logo {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-image: url('./assets/hero_v4.png?v=2');
+    background-image: url('./assets/hero_v7.png?v=2');
     background-size: cover;
-    background-position: center top; /* Align to top to show the figure better */
+    background-position: center center;
     border-bottom: none; /* Removed border to favor the natural fade */
 }
 
@@ -352,6 +352,9 @@ footer {
 @media (max-width: 768px) {
     .features-grid { grid-template-columns: 1fr; }
     .products-grid { grid-template-columns: 1fr; }
+    .hero { background-position: 35% center; } /* Show the moons on the left */
     .hero-title { font-size: 2.5rem; }
     .nav-links { display: none; }
+    .logo-img { height: 12px; }
+    .logo { font-size: 0.5rem; }
 }
