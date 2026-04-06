@@ -11,10 +11,9 @@
     --font-body: 'Almendra', serif; 
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+html, body {
+    overflow-x: hidden;
+    width: 100%;
 }
 
 body {
@@ -568,8 +567,9 @@ footer {
     .features-grid { grid-template-columns: 1fr; }
     .products-grid { grid-template-columns: 1fr; }
     .hero { background-position: 35% center; } /* Show the moons on the left */
-    .hero-title { font-size: 2.5rem; }
-    .nav-links { display: none; }
+    .hero-content { padding: 1.5rem 1rem; width: 90%; } /* Ensure it fits narrow screens */
+    .hero-title { font-size: 2.2rem; } /* Slightly smaller to prevent text break issues */
+    .nav-links { display: none !important; }
     .logo-img { height: 45px; }
     .logo { font-size: 0.6rem; }
 }
