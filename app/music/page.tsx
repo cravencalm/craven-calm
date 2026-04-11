@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AudioPlayer from "../components/AudioPlayer";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ProductGallery from "../components/ProductGallery";
 import { supabase } from "@/lib/supabase";
 
 type Product = {
@@ -16,6 +17,7 @@ type Product = {
   image_url: string;
   audio_length: string;
   is_physical?: boolean;
+  category?: string | null;
 };
 
 export default function MusicPage() {
@@ -24,92 +26,94 @@ export default function MusicPage() {
 
   useEffect(() => {
     async function fetchProducts() {
+      // Show all digital music (specifically excluding mobile wallpapers)
       const { data } = await supabase
         .from("products")
         .select("*")
+        .eq("is_physical", false)
         .order("id", { ascending: false });
-      if (data) setProducts(data);
+      
+      if (data) {
+        // Filter out mobile wallpapers which are handled elsewhere
+        const musicProducts = data.filter(p => {
+          const cats = (p.category || "").split(",").map((c: string) => c.trim());
+          return !cats.includes('mobile-wallpaper');
+        });
+        setProducts(musicProducts);
+      }
       setLoading(false);
     }
     fetchProducts();
   }, []);
 
-  const handleCheckout = async (productId: string) => {
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) {
-      console.error(e);
-    }
+  // Helper to filter by category
+  const getByCategory = (catName: string) => {
+    return products.filter(p => {
+      const cats = (p.category || "").split(",").map((c: string) => c.trim());
+      return cats.includes(catName);
+    });
   };
+
+  const gothicProducts = getByCategory('gothic');
+  const sleepProducts = getByCategory('sleep-relaxation');
+  const otherProducts = products.filter(p => {
+    const cats = (p.category || "").split(",").map((c: string) => c.trim());
+    return !cats.includes('gothic') && !cats.includes('sleep-relaxation');
+  });
 
   return (
     <>
       <Navbar />
 
-      {/* Page header — sits below the absolute navbar */}
       <div className="music-page-header">
         <h1 className="music-page-title">The Complete Collection</h1>
-        <p className="music-page-subtitle">Every release from the Sanctuary — explore, listen &amp; own</p>
+        <p className="music-page-subtitle">Every release from the Sanctuary — explore & define your path</p>
       </div>
 
-      <main style={{ paddingTop: "2rem" }}>
-        <section className="releases-section">
-          <div className="products-grid">
-            {loading ? (
-              <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>
-                Summoning melodies…
-              </p>
-            ) : products.length > 0 ? (
-              products.map((product) => (
-                <div className="product-card" key={product.id}>
-                  <div className="product-image-wrapper">
-                    <img
-                      src={product.image_url || "/assets/album_art_1_1775220324510.png"}
-                      alt={product.name}
-                    />
-                    <span className="price-tag">${(product.price_cents / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="product-info">
-                    <h3>{product.name}</h3>
-                    <p className="sub-text">{product.is_physical ? "Physical Metal Poster" : "Craven Calm Exclusive"}</p>
-
-                    {product.audio_length && !product.is_physical && (
-                      <p style={{ fontSize: "0.8rem", color: "var(--accent-hover)", marginBottom: "1rem", fontStyle: "italic" }}>
-                        ⏱️ {product.audio_length}
-                      </p>
-                    )}
-
-                    {product.mp3_preview_url && (
-                      <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                        <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>
-                          {product.is_physical ? "Artwork Preview" : "Audio Preview"}
-                        </p>
-                        <AudioPlayer src={product.mp3_preview_url} />
-                      </div>
-                    )}
-
-                    <button
-                      className="btn-buy stripe-buy"
-                      onClick={() => handleCheckout(product.id.toString())}
-                    >
-                      {product.is_physical ? "Buy Metal Poster" : "Buy MP3/ZIP"}
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>
-                No albums published yet. Check back soon.
-              </p>
-            )}
+      <main style={{ paddingBottom: "4rem" }}>
+        {/* Gothic Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>The Gothic Collection</h2>
+            <span className="ornament right">&#10086;</span>
           </div>
-        </section>
+          <ProductGallery 
+            products={gothicProducts} 
+            loading={loading} 
+            emptyMessage="No gothic melodies found." 
+          />
+        </div>
+
+        {/* Sleep & Relaxation Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Sleep & Relaxation</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={sleepProducts} 
+            loading={loading} 
+            emptyMessage="No tranquil tones found." 
+          />
+        </div>
+
+        {/* Miscellaneous / Other Section */}
+        {otherProducts.length > 0 && (
+          <div style={{ marginTop: "3rem" }}>
+            <div className="section-divider">
+              <span className="ornament left">&#10086;</span>
+              <h2>Additional Releases</h2>
+              <span className="ornament right">&#10086;</span>
+            </div>
+            <ProductGallery 
+              products={otherProducts} 
+              loading={loading} 
+              emptyMessage="No other releases found." 
+            />
+          </div>
+        )}
       </main>
 
       <Footer />

@@ -18,12 +18,22 @@ type Product = {
   image_url: string;
   audio_length: string;
   is_physical?: boolean;
+  category?: string | null;
 };
 
 type FeaturedVideo = {
   id: number;
   title: string;
   youtube_url: string;
+};
+
+type Book = {
+  id: number;
+  title: string;
+  author: string;
+  image_url: string | null;
+  bookshop_url: string;
+  is_featured: boolean;
 };
 
 /** Extract YouTube video ID from a URL */
@@ -36,6 +46,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>([]);
+  const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -47,12 +58,17 @@ export default function Home() {
       try {
         const { data, error } = await supabase.from("featured_videos").select("*").order("sort_order", { ascending: true });
         if (data && !error) setFeaturedVideos(data);
-      } catch (_) {
-        // Table may not exist yet — fail silently
-      }
+      } catch (_) {}
+    }
+    async function fetchFeaturedBooks() {
+      try {
+        const { data, error } = await supabase.from("books").select("*").eq("is_featured", true).order("id", { ascending: false });
+        if (data && !error) setFeaturedBooks(data);
+      } catch (_) {}
     }
     fetchProducts();
     fetchVideos();
+    fetchFeaturedBooks();
   }, []);
 
   const handleCheckout = async (productId: string) => {
@@ -77,9 +93,9 @@ export default function Home() {
 
       <header className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">Ethereal Music & Dark Academia Art for the Soul</h1>
+          <h1 className="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
           <div className="hero-divider"></div>
-          <p className="hero-subtitle">Find Your Inner Peace</p>
+          <p className="hero-subtitle">Ambient & Gothic journeys for deep rest🌙🌙</p>
         </div>
       </header>
 
@@ -127,8 +143,8 @@ export default function Home() {
           <div className="products-grid">
             {loading ? (
               <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>Summoning melodies...</p>
-            ) : products.filter(p => !p.is_physical).length > 0 ? (
-              products.filter(p => !p.is_physical).slice(0, 4).map((product) => (
+            ) : products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper"))).length > 0 ? (
+              products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper"))).slice(0, 4).map((product) => (
                 <div className="product-card" key={product.id}>
                   <div className="product-image-wrapper">
                     <img src={product.image_url || "/assets/album_art_1_1775220324510.png"} alt={product.name} />
@@ -158,7 +174,7 @@ export default function Home() {
                 <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic" }}>No albums published yet.</p>
             )}
           </div>
-          {!loading && products.filter(p => !p.is_physical).length > 0 && (
+          {!loading && products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper"))).length > 0 && (
             <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
               <a href="/music" className="view-all-link">View All Music &rarr;</a>
             </div>
@@ -208,7 +224,43 @@ export default function Home() {
           )}
         </section>
 
-        {/* Only show the divider + visuals section if there are videos, or always show the section */}
+        {/* Featured Books Section */}
+        {featuredBooks.length > 0 && (
+          <>
+            <div className="section-divider" id="library">
+              <span className="ornament left">&#10086;</span>
+              <h2>Featured Volumes</h2>
+              <span className="ornament right">&#10086;</span>
+            </div>
+
+            <section id="featured-books" style={{ marginBottom: "4rem" }}>
+              <div className="products-grid">
+                {featuredBooks.map((book) => (
+                  <div className="product-card book-card-home" key={book.id}>
+                    <div className="product-image-wrapper" style={{ aspectRatio: '2/3' }}>
+                      <img src={book.image_url || "/assets/album_art_1_1775220324510.png"} alt={book.title} style={{ objectFit: 'cover' }} />
+                    </div>
+                    <div className="product-info">
+                      <h3 style={{ fontSize: '1.1rem' }}>{book.title}</h3>
+                      <p className="sub-text" style={{ fontStyle: 'italic' }}>by {book.author}</p>
+                      <a href={book.bookshop_url} target="_blank" rel="noopener noreferrer" className="btn-buy book-btn" style={{ textDecoration: 'none' }}>
+                        View on Bookshop
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ textAlign: "center", fontSize: "0.85rem", opacity: 0.6, marginTop: "2rem", fontStyle: "italic", padding: "0 10%" }}>
+                As a Bookshop.org affiliate, Craven Calm earns a commission from qualifying purchases.
+              </p>
+              <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+                <a href="/books" className="view-all-link">Visit The Library &rarr;</a>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Featured Visuals Section */}
         <div className="section-divider">
           <span className="ornament left">&#10086;</span>
           <h2>Featured Visuals</h2>

@@ -1,11 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setActiveDropdown(null);
+  };
+
+  const toggleDropdown = (name: string) => {
+    if (window.innerWidth <= 768) {
+      setActiveDropdown(activeDropdown === name ? null : name);
+    }
+  };
+
+  // Close menu on resize if screen becomes large
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen]);
+
   return (
     <nav className="navbar">
-      <Link href="/" className="logo-link">
+      <Link href="/" className="logo-link" onClick={closeMenu}>
         <img
           src="/assets/final_logo_v7.png"
           alt="Craven Calm Logo"
@@ -20,11 +47,119 @@ export default function Navbar() {
           cravencalm.com
         </div>
       </Link>
-      <div className="nav-links">
-        <Link href="/sanctuary">Sanctuary</Link>
-        <Link href="/music">Music</Link>
-        <Link href="/#store">Store</Link>
-        <Link href="/admin">Admin (CMS)</Link>
+
+      <button
+        className="menu-toggle"
+        onClick={toggleMenu}
+        aria-label="Toggle Navigation"
+      >
+        {isOpen ? "✕" : "☰"}
+      </button>
+
+      <div className={`nav-links ${isOpen ? "active" : ""}`}>
+        <Link href="/" onClick={closeMenu}>
+          Home
+        </Link>
+        <Link href="/sanctuary" onClick={closeMenu}>
+          Sanctuary
+        </Link>
+        <Link href="/books" onClick={closeMenu}>
+          Books
+        </Link>
+
+        <div
+          className={`nav-item-wrapper ${
+            activeDropdown === "music" ? "active" : ""
+          }`}
+        >
+          <Link
+            href="/music"
+            onClick={(e) => {
+              if (window.innerWidth <= 768) {
+                e.preventDefault();
+                toggleDropdown("music");
+              } else {
+                closeMenu();
+              }
+            }}
+          >
+            Music <span className="nav-arrow">▼</span>
+          </Link>
+          <div className="nav-dropdown">
+            <Link href="/music/gothic" onClick={closeMenu}>
+              Gothic Collection
+            </Link>
+            <Link href="/music/sleep-relaxation" onClick={closeMenu}>
+              Sleep & Relaxation
+            </Link>
+            <Link href="/music" onClick={closeMenu}>
+              All Releases
+            </Link>
+          </div>
+        </div>
+
+        <div
+          className={`nav-item-wrapper ${
+            activeDropdown === "art" ? "active" : ""
+          }`}
+        >
+          <Link
+            href="/art"
+            onClick={(e) => {
+              if (window.innerWidth <= 768) {
+                e.preventDefault();
+                toggleDropdown("art");
+              } else {
+                closeMenu();
+              }
+            }}
+          >
+            Art <span className="nav-arrow">▼</span>
+          </Link>
+          <div className="nav-dropdown">
+            <Link href="/art/wall-art" onClick={closeMenu}>
+              Wall-Art (Posters)
+            </Link>
+            <Link href="/art/mobile-wallpapers" onClick={closeMenu}>
+              Mobile Wallpapers
+            </Link>
+            <Link href="/art" onClick={closeMenu}>
+              All Artwork
+            </Link>
+          </div>
+        </div>
+
+        <div
+          className={`nav-item-wrapper ${
+            activeDropdown === "sessions" ? "active" : ""
+          }`}
+        >
+          <Link
+            href="/sessions"
+            onClick={(e) => {
+              if (window.innerWidth <= 768) {
+                e.preventDefault();
+                toggleDropdown("sessions");
+              } else {
+                closeMenu();
+              }
+            }}
+          >
+            Sessions <span className="nav-arrow">▼</span>
+          </Link>
+          <div className="nav-dropdown">
+            <Link href="/sessions/dark-calm" onClick={closeMenu}>
+              Dark Calm
+            </Link>
+            <Link href="/sessions" onClick={closeMenu}>
+              All Sessions
+            </Link>
+          </div>
+        </div>
+
+        <Link href="/admin" onClick={closeMenu}>
+          Admin
+        </Link>
       </div>
     </nav>
   );

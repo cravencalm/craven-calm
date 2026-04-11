@@ -99,4 +99,24 @@ document.addEventListener('DOMContentLoaded', () => {
             timeDisplay.textContent = `0:00 / ${durStr}`;
         }
     });
+
+    // --- Mobile Menu Toggle ---
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            // Change icon to 'X' when open
+            menuToggle.innerHTML = navLinks.classList.contains('active') ? '&times;' : '&#9776;';
+        });
+
+        // Close menu when a link is clicked
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                if (menuToggle) menuToggle.innerHTML = '&#9776;';
+            });
+        });
+    }
 });

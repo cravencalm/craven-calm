@@ -13,7 +13,11 @@
             <img src="./assets/final_logo_v7.png" alt="Craven Calm Logo" class="logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='block';">
             <div id="fallback-logo" class="logo" style="display:none;">cravencalm.com</div>
         </a>
-        <div class="nav-links">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation">
+            &#9776;
+        </button>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
             <a href="#music">Music</a>
             <a href="#store">Store</a>
             <a href="#about">About</a>
@@ -23,7 +27,7 @@
 
     <header class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">Ethereal Music & Dark Academia Art for the Soul</h1>
+            <h1 class="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
             <div class="hero-divider"></div>
             <p class="hero-subtitle">Find Your Inner Peace</p>
         </div>
@@ -124,8 +128,18 @@
     </main>
 
     <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/cravencalm" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/craven_calm" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@cravencalm" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.youtube.com/@cravencalm" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://open.spotify.com/artist/4FpDnKrTaERTj08P4hIBNW?si=HroDHVcOS5SXFnTcNQ5cAA" target="_blank" rel="noopener noreferrer" aria-label="Spotify"><i class="fab fa-spotify"></i></a>
+        </div>
         <p>&copy; 2026 Craven Calm. All rights reserved.</p>
     </footer>
+
+    <!-- Add Font Awesome for social icons in static version -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script src="app.js"></script>
 </body>

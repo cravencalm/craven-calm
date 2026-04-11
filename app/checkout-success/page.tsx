@@ -8,6 +8,7 @@ type Product = {
   name: string;
   mp3_preview_url: string;
   zip_file_url: string;
+  is_physical: boolean;
 };
 
 import { Suspense } from "react";
@@ -29,7 +30,7 @@ function CheckoutSuccessContent() {
 
       const { data, error } = await supabase
         .from("products")
-        .select("name, mp3_preview_url, zip_file_url")
+        .select("name, mp3_preview_url, zip_file_url, is_physical")
         .eq("id", productId)
         .single();
 
@@ -58,28 +59,38 @@ function CheckoutSuccessContent() {
         <p style={{ fontStyle: "italic", fontFamily: "var(--font-body)" }}>Conjuring your files...</p>
       ) : product ? (
         <div style={{ background: "var(--card-bg)", padding: "3rem", border: "1px solid var(--border-color)", boxShadow: "0 0 30px rgba(0,0,0,0.8)" }}>
-          <h2 style={{ marginBottom: "2rem" }}>Downloads for: {product.name}</h2>
+          <h2 style={{ marginBottom: "2rem" }}>{product.name}</h2>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
-            
-            {product.zip_file_url && (
-              <a 
-                href={product.zip_file_url} 
-                download 
-                target="_blank" 
-                rel="noreferrer"
-                className="btn-action" 
-                style={{ textDecoration: "none", width: "100%", maxWidth: "300px", background: "var(--accent-color)", color: "#000" }}
-              >
-                Download High-Res ZIP
-              </a>
-            )}
-
-          </div>
-
-          <p style={{ fontFamily: "var(--font-body)", color: "#888", marginTop: "3rem", fontSize: "0.9rem" }}>
-            Please bookmark or download these immediately. 
-          </p>
+          {product.is_physical ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
+              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📦</div>
+              <p style={{ fontFamily: "var(--font-body)", color: "var(--accent-color)", fontSize: "1.1rem", lineHeight: "1.6" }}>
+                Your physical piece is now being prepared in the shadows. <br/>
+                We have received your shipping details and will notify you when it has been dispatched.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h3 style={{ marginBottom: "2rem", color: "var(--text-color)", fontSize: "1.1rem" }}>Your digital sanctuary is ready:</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
+                {product.zip_file_url && (
+                  <a 
+                    href={product.zip_file_url} 
+                    download 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="btn-action" 
+                    style={{ textDecoration: "none", width: "100%", maxWidth: "300px", background: "var(--accent-color)", color: "#000" }}
+                  >
+                    Download High-Res ZIP
+                  </a>
+                )}
+              </div>
+              <p style={{ fontFamily: "var(--font-body)", color: "#888", marginTop: "3rem", fontSize: "0.9rem" }}>
+                Please bookmark or download these immediately. 
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <p style={{ color: "#d9534f" }}>Invalid session or product missing. Contact support if you bought something.</p>

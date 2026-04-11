@@ -17,12 +17,13 @@ export default function Sanctuary() {
           <div className="about-content">
             <h3 style={{ fontSize: "1.8rem", color: "var(--accent-color)", marginBottom: "1rem", fontFamily: "var(--font-heading)" }}>Craven Calm</h3>
             <p>
-              Born from a quiet obsession with the spaces between sound and silence, Craven Calm is a sanctuary for the weary mind. 
-              Our compositions are meticulously crafted to bypass the analytical brain and speak directly to the deeper, shadowed parts of the soul.
+              Craven Calm is built around a simple idea: exploring the space between sound and silence. It’s a quiet place for slowing down, letting go of noise, and turning inward.
             </p>
             <p>
-              Drawing inspiration from crumbling gothic architecture, fog-drenched forests, and the flickering glow of a single candle at midnight, 
-              we weave heavy drones and hypnotic ambient textures intended for meditation, deep study, and the quiet hours of introspection. 
+              Inspired by gothic ruins, foggy forests, and the soft glow of candlelight, we create slow, immersive ambient music using deep drones and gentle textures. The work is made for calm moments—meditation, focus, and reflection.
+            </p>
+            <p>
+              Alongside music, Craven Calm also creates visual art shaped by the same mood and influences, extending that atmosphere into something you can see as well as hear.
             </p>
             <p style={{ fontStyle: "italic", textAlign: "center", marginTop: "2rem" }}>
               Leave the chaos of the waking world behind.<br/>Find your inner peace in the dark.

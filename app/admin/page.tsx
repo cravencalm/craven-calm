@@ -14,8 +14,7 @@ type Product = {
   image_url: string | null;
   audio_length: string | null;
   is_physical?: boolean;
-  gelato_uid?: string | null;
-  gelato_file_url?: string | null;
+  category?: string | null;
 };
 
 type FeaturedVideo = {
@@ -29,6 +28,18 @@ type Subscriber = {
   id: number;
   email: string;
   created_at: string;
+};
+
+type Book = {
+  id: number;
+  title: string;
+  author: string;
+  description: string | null;
+  image_url: string | null;
+  bookshop_url: string;
+  category: "Horror" | "Meditation" | "Mystery" | "Western" | null;
+  is_featured: boolean;
+  sort_order: number;
 };
 
 /** Extract the 11-char YouTube video ID from any common URL format */
@@ -52,8 +63,17 @@ export default function AdminDashboard() {
 
   // Gelato / Physical state
   const [isPhysical, setIsPhysical] = useState(false);
-  const [gelatoUid, setGelatoUid] = useState("");
-  const [gelatoFileUrl, setGelatoFileUrl] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["gothic"]);
+
+  const CATEGORIES = [
+    { id: "gothic", label: "Gothic", group: "Music Releases" },
+    { id: "sleep-relaxation", label: "Sleep & Relaxation", group: "Music Releases" },
+    { id: "wall-art", label: "Wall-Art", group: "Artwork" },
+    { id: "mobile-wallpaper", label: "Mobile Wallpapers", group: "Artwork" },
+    { id: "limited-print", label: "Limited Print", group: "Artwork" },
+    { id: "sculpture", label: "Sculpture", group: "Artwork" },
+    { id: "session-dark-calm", label: "Dark Calm", group: "Guided Sessions" },
+  ];
 
   // Featured Videos state
   const [videos, setVideos] = useState<FeaturedVideo[]>([]);
@@ -66,6 +86,19 @@ export default function AdminDashboard() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
 
+  // Books state
+  const [books, setBooks] = useState<Book[]>([]);
+  const [bookTitle, setBookTitle] = useState("");
+  const [bookAuthor, setBookAuthor] = useState("");
+  const [bookDescription, setBookDescription] = useState("");
+  const [bookShopUrl, setBookShopUrl] = useState("");
+  const [bookImageUrl, setBookImageUrl] = useState("");
+  const [bookCategory, setBookCategory] = useState<"Horror" | "Meditation" | "Mystery" | "Western" | "">("");
+  const [isBookFeatured, setIsBookFeatured] = useState(false);
+  const [bookStatus, setBookStatus] = useState("");
+  const [bookLoading, setBookLoading] = useState(false);
+  const [bookEditingId, setBookEditingId] = useState<number | null>(null);
+
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
   const [authEmail, setAuthEmail] = useState("");
@@ -76,12 +109,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); }
-      else { setProducts([]); setVideos([]); setSubscribers([]); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); }
+      else { setProducts([]); setVideos([]); setSubscribers([]); setBooks([]); }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -105,6 +138,13 @@ export default function AdminDashboard() {
     setSubscribersLoading(false);
   };
 
+  const fetchBooks = async () => {
+    setBookLoading(true);
+    const { data } = await supabase.from("books").select("*").order("sort_order", { ascending: true });
+    if (data) setBooks(data);
+    setBookLoading(false);
+  };
+
   const handleSelectProduct = (product: Product | null) => {
     setStatus("");
     if (product) {
@@ -117,8 +157,8 @@ export default function AdminDashboard() {
       setImageUrl(product.image_url || "");
       setAudioLength(product.audio_length || "");
       setIsPhysical(product.is_physical || false);
-      setGelatoUid(product.gelato_uid || "");
-      setGelatoFileUrl(product.gelato_file_url || "");
+      const catArray = product.category ? product.category.split(',').map(c => c.trim()) : ["gothic"];
+      setSelectedCategories(catArray);
     } else {
       resetForm();
     }
@@ -126,7 +166,11 @@ export default function AdminDashboard() {
 
   const resetForm = () => {
     setYoutubeId(""); setAudioLength(""); setMp3Url(""); setZipUrl(""); setImageUrl("");
-    setIsPhysical(false); setGelatoUid(""); setGelatoFileUrl("");
+    setIsPhysical(false);
+    setSelectedCategories(["gothic"]);
+    setEditingId(null);
+    setProductName("");
+    setProductPrice("");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: "mp3" | "zip" | "image") => {
@@ -158,8 +202,8 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (isPhysical && (!gelatoUid || !gelatoFileUrl)) {
-      setStatus("❌ For physical products, both Gelato UID and Print File URL are required.");
+    if (isPhysical && !imageUrl) {
+      setStatus("❌ For physical products, an image/artwork upload is recommended.");
       return;
     }
 
@@ -173,11 +217,9 @@ export default function AdminDashboard() {
       zip_file_url: zipUrl || null, 
       image_url: imageUrl || null,
       is_physical: isPhysical,
-      gelato_uid: isPhysical ? gelatoUid : null,
-      gelato_file_url: isPhysical ? gelatoFileUrl : null
+      category: selectedCategories.join(",")
     };
 
-    console.log("Saving payload:", payload);
     if (editingId) {
       const { error } = await supabase.from('products').update(payload).eq("id", editingId);
       if (error) {
@@ -198,6 +240,20 @@ export default function AdminDashboard() {
         fetchProducts(); 
         resetForm(); 
       }
+    }
+  };
+
+  const handleDeleteProduct = async (id: number, name: string) => {
+    if (!confirm(`Are you sure you want to permanently delete "${name}"? This action cannot be undone.`)) return;
+    setStatus(`Deleting "${name}"...`);
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) {
+      console.error("Supabase Delete Error:", error);
+      setStatus(`❌ Failed to delete: ${error.message}`);
+    } else {
+      setStatus(`✅ "${name}" has been removed from the sanctuary.`);
+      fetchProducts();
+      handleSelectProduct(null);
     }
   };
 
@@ -229,6 +285,80 @@ export default function AdminDashboard() {
     const { error } = await supabase.from("subscribers").delete().eq("id", id);
     if (error) alert(`Failed to delete: ${error.message}`);
     else fetchSubscribers();
+  };
+
+  const handleSelectBook = (book: Book | null) => {
+    setBookStatus("");
+    if (book) {
+      setBookEditingId(book.id);
+      setBookTitle(book.title);
+      setBookAuthor(book.author);
+      setBookDescription(book.description || "");
+      setBookShopUrl(book.bookshop_url);
+      setBookImageUrl(book.image_url || "");
+      setBookCategory(book.category || "");
+      setIsBookFeatured(book.is_featured);
+    } else {
+      resetBookForm();
+    }
+  };
+
+  const resetBookForm = () => {
+    setBookEditingId(null);
+    setBookTitle("");
+    setBookAuthor("");
+    setBookDescription("");
+    setBookShopUrl("");
+    setBookImageUrl("");
+    setBookCategory("");
+    setIsBookFeatured(false);
+    setBookStatus("");
+  };
+
+  const handleSaveBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBookStatus("Saving book...");
+    const payload = {
+      title: bookTitle,
+      author: bookAuthor,
+      description: bookDescription || null,
+      bookshop_url: bookShopUrl,
+      image_url: bookImageUrl || null,
+      category: bookCategory || null,
+      is_featured: isBookFeatured,
+      sort_order: books.length
+    };
+
+    if (bookEditingId) {
+      const { error } = await supabase.from("books").update(payload).eq("id", bookEditingId);
+      if (error) setBookStatus(`❌ Error: ${error.message}`);
+      else { setBookStatus("✅ Book updated!"); fetchBooks(); resetBookForm(); }
+    } else {
+      const { error } = await supabase.from("books").insert([payload]);
+      if (error) setBookStatus(`❌ Error: ${error.message}`);
+      else { setBookStatus("✅ Book added!"); fetchBooks(); resetBookForm(); }
+    }
+  };
+
+  const handleDeleteBook = async (id: number, title: string) => {
+    if (!confirm(`Delete "${title}"?`)) return;
+    const { error } = await supabase.from("books").delete().eq("id", id);
+    if (error) setBookStatus(`❌ Error: ${error.message}`);
+    else { setBookStatus(`✅ "${title}" removed.`); fetchBooks(); handleSelectBook(null); }
+  };
+
+  const handleBookImageUrlUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBookStatus("Uploading cover...");
+    const fileExt = file.name.split('.').pop();
+    const fileName = `book_${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
+    const filePath = `books/${fileName}`;
+    const { error } = await supabase.storage.from("products_media").upload(filePath, file);
+    if (error) { setBookStatus(`❌ Upload failed: ${error.message}`); return; }
+    const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
+    setBookImageUrl(publicUrlData.publicUrl);
+    setBookStatus(`✅ Cover uploaded: ${file.name}`);
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -281,13 +411,49 @@ export default function AdminDashboard() {
 
       {/* ─── PRODUCTS ─── */}
       <div style={{ background: "#0a0a0c", padding: "1.5rem", border: "1px solid #333", marginTop: "2rem" }}>
-        <h3 style={{ marginBottom: "1rem" }}>Edit Existing Products</h3>
-        {loading ? <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>Loading products...</p> : products.length > 0 ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-            <button onClick={() => handleSelectProduct(null)} style={{ background: editingId === null ? "var(--accent-color)" : "#222", color: editingId === null ? "#000" : "#fff", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer" }}>+ Create New Product</button>
-            {products.map(p => (
-              <button key={p.id} onClick={() => handleSelectProduct(p)} style={{ background: editingId === p.id ? "var(--accent-color)" : "transparent", color: editingId === p.id ? "#000" : "var(--accent-color)", border: `1px solid ${editingId === p.id ? "var(--accent-color)" : "#444"}`, padding: "0.4rem 1rem", cursor: "pointer" }}>{p.name}</button>
-            ))}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <h3 style={{ margin: 0 }}>Existing Sanctuary Items</h3>
+          <button onClick={() => handleSelectProduct(null)} style={{ background: editingId === null ? "var(--accent-color)" : "#222", color: editingId === null ? "#000" : "#fff", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}>+ ADD NEW PRODUCT</button>
+        </div>
+
+        {loading ? (
+          <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>Loading products...</p>
+        ) : products.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {["Music Releases", "Artwork", "Guided Sessions", "Uncategorized"].map(groupName => {
+              const groupProducts = products.filter(p => {
+                const cats = p.category?.split(',').map(c => c.trim()) || [];
+                if (groupName === "Uncategorized") return cats.length === 0 || cats[0] === "";
+                return CATEGORIES.filter(c => c.group === groupName).some(c => cats.includes(c.id));
+              });
+
+              if (groupProducts.length === 0) return null;
+
+              return (
+                <div key={groupName}>
+                  <p style={{ fontSize: "0.7rem", color: "var(--accent-color)", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: "0.75rem", fontWeight: "bold", borderBottom: "1px solid #222", paddingBottom: "0.3rem" }}>{groupName}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                    {groupProducts.map(p => (
+                      <button 
+                        key={p.id} 
+                        onClick={() => handleSelectProduct(p)} 
+                        style={{ 
+                          background: editingId === p.id ? "var(--accent-color)" : "transparent", 
+                          color: editingId === p.id ? "#000" : "var(--accent-color)", 
+                          border: `1px solid ${editingId === p.id ? "var(--accent-color)" : "#444"}`, 
+                          padding: "0.4rem 1rem", 
+                          cursor: "pointer",
+                          fontSize: "0.85rem",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>No products yet.</p>}
       </div>
@@ -315,32 +481,64 @@ export default function AdminDashboard() {
             {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>Link attached!</p>}
           </div>
 
+          <div style={{ padding: "1.5rem", background: "var(--card-bg)", border: "1px solid #333" }}>
+            <label style={{ display: "block", marginBottom: "1rem", fontWeight: "bold", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>Product Categories</label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
+              {["Music Releases", "Artwork", "Guided Sessions"].map(group => (
+                <div key={group} style={{ marginBottom: "1rem" }}>
+                  <p style={{ fontSize: "0.75rem", color: "var(--accent-color)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem", fontWeight: "bold" }}>{group}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    {CATEGORIES.filter(c => c.group === group).map(cat => (
+                      <label key={cat.id} style={{ display: "flex", alignItems: "center", gap: "0.8rem", cursor: "pointer", fontSize: "0.9rem" }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedCategories.includes(cat.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCategories([...selectedCategories, cat.id]);
+                            } else {
+                              setSelectedCategories(selectedCategories.filter(c => c !== cat.id));
+                            }
+                          }}
+                          style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                        />
+                        {cat.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: "0.8rem", color: "#888", marginTop: "1rem", fontStyle: "italic" }}>A release can belong to multiple categories.</p>
+          </div>
+
           <div style={{ padding: "1.5rem", background: isPhysical ? "#121216" : "#0d0d0f", border: `1px solid ${isPhysical ? "var(--accent-color)" : "#333"}`, transition: "all 0.3s ease" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: isPhysical ? "1.5rem" : "0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <input type="checkbox" id="isPhysical" checked={isPhysical} onChange={e => setIsPhysical(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
               <label htmlFor="isPhysical" style={{ fontSize: "1.1rem", fontWeight: "bold", cursor: "pointer", color: isPhysical ? "var(--accent-color)" : "inherit" }}>
-                Physical Product (Fulfill via Gelato)
+                Physical Product (Manual Fulfillment)
               </label>
             </div>
-            
             {isPhysical && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "1rem", borderTop: "1px solid #333", paddingTop: "1.5rem" }}>
-                <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem" }}>Gelato Product UID</label>
-                  <input value={gelatoUid} onChange={e => setGelatoUid(e.target.value)} placeholder="e.g. framed_poster_300x450-mm_black_aluminum_ver" style={inputStyle} />
-                  <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Find this in your Gelato Product Catalog dashboard.</p>
-                </div>
-                <div>
-                  <label style={{ display: "block", marginBottom: "0.5rem" }}>High-Res Print File URL (Google Drive)</label>
-                  <input type="url" value={gelatoFileUrl} onChange={e => setGelatoFileUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
-                  <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.4rem" }}>Standard Google Drive links will be automatically converted to direct download links during fulfillment.</p>
-                </div>
-              </div>
+              <p style={{ fontSize: "0.85rem", color: "#888", marginTop: "1rem", borderTop: "1px solid #333", paddingTop: "1rem" }}>
+                Stripe will collect shipping addresses for this item. You will receive an email upon purchase to fulfill it manually.
+              </p>
             )}
           </div>
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "1rem" }}>
             <button type="submit" className="btn-action">{editingId ? "Update Product" : "Save New Product"}</button>
-            {editingId && <button type="button" onClick={() => handleSelectProduct(null)} style={{ background: "transparent", color: "#888", border: "1px solid #444", padding: "0.8rem 2.5rem", cursor: "pointer", fontFamily: "var(--font-heading)", textTransform: "uppercase" }}>Cancel Edit</button>}
+            {editingId && (
+              <>
+                <button type="button" onClick={() => handleSelectProduct(null)} style={{ background: "transparent", color: "#888", border: "1px solid #444", padding: "0.8rem 1.5rem", cursor: "pointer", fontFamily: "var(--font-heading)", textTransform: "uppercase", fontSize: "0.9rem" }}>Cancel Edit</button>
+                <button 
+                  type="button" 
+                  onClick={() => handleDeleteProduct(editingId, productName)} 
+                  style={{ background: "transparent", color: "#f44336", border: "1px solid #f44336", padding: "0.8rem 1.5rem", cursor: "pointer", fontFamily: "var(--font-heading)", textTransform: "uppercase", fontSize: "0.9rem", marginLeft: "auto" }}
+                >
+                  Delete Product
+                </button>
+              </>
+            )}
           </div>
           {status && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", fontFamily: "var(--font-body)", marginTop: "1rem" }}>{status}</p>}
         </form>
@@ -400,6 +598,102 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* ─── BOOKS ─── */}
+      <div id="books-cms" style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem" }}>
+        <h2 style={{ marginBottom: "0.5rem" }}>📚 Volumes of the Library</h2>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+          Feature books from Bookshop.org. Books appear on the "Books" page and featured ones on the home page.
+        </p>
+
+        <div style={{ background: "#0a0a0c", padding: "1.5rem", border: "1px solid #333", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+            <h3 style={{ margin: 0 }}>Current Catalog</h3>
+            <button onClick={() => handleSelectBook(null)} style={{ background: bookEditingId === null ? "var(--accent-color)" : "#222", color: bookEditingId === null ? "#000" : "#fff", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}>+ ADD NEW BOOK</button>
+          </div>
+          
+          {bookLoading ? <p>Loading library...</p> : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {books.map(b => (
+                <button 
+                  key={b.id} 
+                  onClick={() => handleSelectBook(b)}
+                  style={{ 
+                    background: bookEditingId === b.id ? "var(--accent-color)" : "transparent", 
+                    color: bookEditingId === b.id ? "#000" : "var(--accent-color)", 
+                    border: `1px solid ${bookEditingId === b.id ? "var(--accent-color)" : "#444"}`, 
+                    padding: "0.4rem 1rem", 
+                    cursor: "pointer",
+                    fontSize: "0.85rem"
+                  }}
+                >
+                  {b.title} {b.is_featured && "⭐"}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ background: "var(--card-bg)", padding: "2rem", border: "1px solid var(--border-color)" }}>
+          <h3 style={{ marginBottom: "1.5rem", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>{bookEditingId ? `Edit: ${bookTitle}` : "Feature a New Book"}</h3>
+          <form onSubmit={handleSaveBook} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Title</label>
+                <input required value={bookTitle} onChange={e => setBookTitle(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Author</label>
+                <input required value={bookAuthor} onChange={e => setBookAuthor(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
+              </div>
+            </div>
+            
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Bookshop.org Affiliate URL</label>
+              <input required type="url" value={bookShopUrl} onChange={e => setBookShopUrl(e.target.value)} placeholder="https://bookshop.org/a/..." style={{ ...inputStyle, width: "100%" }} />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Description (Optional)</label>
+              <textarea value={bookDescription} onChange={e => setBookDescription(e.target.value)} rows={3} style={{ ...inputStyle, width: "100%", fontFamily: "var(--font-body)", resize: "vertical" }} />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Category</label>
+                <select required value={bookCategory} onChange={e => setBookCategory(e.target.value as any)} style={{ ...inputStyle, width: "100%" }}>
+                  <option value="">Select Category</option>
+                  <option value="Horror">Horror</option>
+                  <option value="Meditation">Meditation</option>
+                  <option value="Mystery">Mystery</option>
+                  <option value="Western">Western</option>
+                </select>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", paddingTop: "1.8rem" }}>
+                <input type="checkbox" id="isBookFeatured" checked={isBookFeatured} onChange={e => setIsBookFeatured(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+                <label htmlFor="isBookFeatured" style={{ cursor: "pointer", fontWeight: "bold", color: isBookFeatured ? "var(--accent-color)" : "inherit" }}>Feature on Homepage</label>
+              </div>
+            </div>
+
+            <div style={{ padding: "1rem", background: "#0a0a0c", border: "1px dashed #333" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Upload Book Cover {bookImageUrl && "— File Active"}</label>
+              <input type="file" accept="image/*" onChange={handleBookImageUrlUpload} style={{ color: "var(--accent-color)", width: "100%" }} />
+              {bookImageUrl && <img src={bookImageUrl} alt="Preview" style={{ height: "100px", marginTop: "1rem", border: "1px solid #333" }} />}
+            </div>
+
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button type="submit" className="btn-action" style={{ flex: 1 }}>{bookEditingId ? "Update Book" : "Add to Library"}</button>
+              {bookEditingId && (
+                <>
+                  <button type="button" onClick={() => handleSelectBook(null)} style={{ background: "transparent", border: "1px solid #444", color: "#888", padding: "0 1.5rem" }}>Cancel</button>
+                  <button type="button" onClick={() => handleDeleteBook(bookEditingId, bookTitle)} style={{ background: "transparent", border: "1px solid #f44336", color: "#f44336", padding: "0 1.5rem" }}>Delete</button>
+                </>
+              )}
+            </div>
+            {bookStatus && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", textAlign: "center" }}>{bookStatus}</p>}
+          </form>
+        </div>
       </div>
 
       {/* ─── NEWSLETTER SUBSCRIBERS ─── */}
