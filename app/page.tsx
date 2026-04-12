@@ -106,28 +106,28 @@ export default function Home() {
             <div className="feature-card">
               <h3 className="card-title">Candlelit Reprieve</h3>
               <div className="card-img-wrapper">
-                <img src="/assets/candlelit_reprieve_1775280300978.png" alt="Candlelit Reprieve" />
+                <img src="/assets/candlelit_reprieve_new.png" alt="Candlelit Reprieve" />
               </div>
               <p className="card-text">
-                Retreat into the quiet sanctuary of your mind. Let heavy, atmospheric drones wash over you to ease anxiety and silence the chaos of the modern world.
+                A warm, flickering glow against the velvet dark. Soft, melodic textures that cradle the mind and invite a gentle, grounded peace in the quiet hours.
               </p>
             </div>
             <div className="feature-card">
               <h3 className="card-title">The Scholar's Focus</h3>
               <div className="card-img-wrapper">
-                <img src="/assets/scholars_focus_1775280317109.png" alt="The Scholar's Focus" />
+                <img src="/assets/scholars_focus_new.png" alt="The Scholar's Focus" />
               </div>
               <p className="card-text">
-                Continuous, rhythmic ambient textures designed to anchor your wandering thoughts. The perfect companion for reading dusty tomes, writing, or deep midnight study.
+                The clarity of early light meeting ancient wisdom. Continuous, rhythmic textures designed to anchor your thoughts in a sanctuary of focus and calm.
               </p>
             </div>
             <div className="feature-card">
-              <h3 className="card-title">Abyssal Stillness</h3>
+              <h3 className="card-title">Celestial Stillness</h3>
               <div className="card-img-wrapper">
-                <img src="/assets/abyssal_stillness_v2_1775280576528.png" alt="Abyssal Stillness" />
+                <img src="/assets/celestial_stillness_new.png" alt="Celestial Stillness" />
               </div>
               <p className="card-text">
-                Descend into profound states of meditation. Our lowest frequencies guide you downward, helping you reach total stillness and explore the quieter depths of your soul.
+                The deep, quiet expanse of a clear, star-filled sky. Grounding frequencies that resolve into a luminous, tranquil state, guiding you toward total inner stillness.
               </p>
             </div>
           </div>

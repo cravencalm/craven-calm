@@ -68,6 +68,8 @@ export default function AdminDashboard() {
   const CATEGORIES = [
     { id: "gothic", label: "Gothic", group: "Music Releases" },
     { id: "sleep-relaxation", label: "Sleep & Relaxation", group: "Music Releases" },
+    { id: "western", label: "Western / Folk", group: "Music Releases" },
+    { id: "world-music", label: "World Music", group: "Music Releases" },
     { id: "wall-art", label: "Wall-Art", group: "Artwork" },
     { id: "mobile-wallpaper", label: "Mobile Wallpapers", group: "Artwork" },
     { id: "limited-print", label: "Limited Print", group: "Artwork" },

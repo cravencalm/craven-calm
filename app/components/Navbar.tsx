@@ -92,6 +92,12 @@ export default function Navbar() {
             <Link href="/music/sleep-relaxation" onClick={closeMenu}>
               Sleep & Relaxation
             </Link>
+            <Link href="/music/western" onClick={closeMenu}>
+              Western / Folk
+            </Link>
+            <Link href="/music/world-music" onClick={closeMenu}>
+              World Music
+            </Link>
             <Link href="/music" onClick={closeMenu}>
               All Releases
             </Link>

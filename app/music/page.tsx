@@ -56,9 +56,15 @@ export default function MusicPage() {
 
   const gothicProducts = getByCategory('gothic');
   const sleepProducts = getByCategory('sleep-relaxation');
+  const westernProducts = getByCategory('western');
+  const worldMusicProducts = getByCategory('world-music');
+
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
-    return !cats.includes('gothic') && !cats.includes('sleep-relaxation');
+    return !cats.includes('gothic') && 
+           !cats.includes('sleep-relaxation') && 
+           !cats.includes('western') && 
+           !cats.includes('world-music');
   });
 
   return (
@@ -96,6 +102,34 @@ export default function MusicPage() {
             products={sleepProducts} 
             loading={loading} 
             emptyMessage="No tranquil tones found." 
+          />
+        </div>
+
+        {/* Western / Folk Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Western / Folk</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={westernProducts} 
+            loading={loading} 
+            emptyMessage="The pioneer's collection is empty." 
+          />
+        </div>
+
+        {/* World Music Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>World Music</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={worldMusicProducts} 
+            loading={loading} 
+            emptyMessage="Exploring the global sounds... no releases yet." 
           />
         </div>
 
