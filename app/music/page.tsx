@@ -58,13 +58,15 @@ export default function MusicPage() {
   const sleepProducts = getByCategory('sleep-relaxation');
   const westernProducts = getByCategory('western');
   const worldMusicProducts = getByCategory('world-music');
+  const meditationProducts = getByCategory('meditation');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
     return !cats.includes('gothic') && 
            !cats.includes('sleep-relaxation') && 
            !cats.includes('western') && 
-           !cats.includes('world-music');
+           !cats.includes('world-music') &&
+           !cats.includes('meditation');
   });
 
   return (
@@ -130,6 +132,20 @@ export default function MusicPage() {
             products={worldMusicProducts} 
             loading={loading} 
             emptyMessage="Exploring the global sounds... no releases yet." 
+          />
+        </div>
+
+        {/* Meditation Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Meditation</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={meditationProducts} 
+            loading={loading} 
+            emptyMessage="Preparing the sanctuary for meditation... no releases yet." 
           />
         </div>
 
