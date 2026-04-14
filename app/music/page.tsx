@@ -59,6 +59,7 @@ export default function MusicPage() {
   const westernProducts = getByCategory('western');
   const worldMusicProducts = getByCategory('world-music');
   const meditationProducts = getByCategory('meditation');
+  const upliftingProducts = getByCategory('uplifting');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -66,7 +67,8 @@ export default function MusicPage() {
            !cats.includes('sleep-relaxation') && 
            !cats.includes('western') && 
            !cats.includes('world-music') &&
-           !cats.includes('meditation');
+           !cats.includes('meditation') &&
+           !cats.includes('uplifting');
   });
 
   return (
@@ -146,6 +148,20 @@ export default function MusicPage() {
             products={meditationProducts} 
             loading={loading} 
             emptyMessage="Preparing the sanctuary for meditation... no releases yet." 
+          />
+        </div>
+
+        {/* Uplifting Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Uplifting</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={upliftingProducts} 
+            loading={loading} 
+            emptyMessage="The soul's elevation begins here... no releases yet." 
           />
         </div>
 

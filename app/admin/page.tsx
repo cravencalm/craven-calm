@@ -70,6 +70,7 @@ export default function AdminDashboard() {
     { id: "sleep-relaxation", label: "Sleep & Relaxation", group: "Music Releases" },
     { id: "western", label: "Western / Folk", group: "Music Releases" },
     { id: "world-music", label: "World Music", group: "Music Releases" },
+    { id: "uplifting", label: "Uplifting", group: "Music Releases" },
     { id: "meditation", label: "Meditation", group: "Music Releases" },
     { id: "wall-art", label: "Wall-Art", group: "Artwork" },
     { id: "mobile-wallpaper", label: "Mobile Wallpapers", group: "Artwork" },

@@ -101,6 +101,9 @@ export default function Navbar() {
             <Link href="/music/meditation" onClick={closeMenu}>
               Meditation
             </Link>
+            <Link href="/music/uplifting" onClick={closeMenu}>
+              Uplifting Collection
+            </Link>
             <Link href="/music" onClick={closeMenu}>
               All Releases
             </Link>
