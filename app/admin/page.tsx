@@ -77,6 +77,7 @@ export default function AdminDashboard() {
     { id: "limited-print", label: "Limited Print", group: "Artwork" },
     { id: "sculpture", label: "Sculpture", group: "Artwork" },
     { id: "session-dark-calm", label: "Dark Calm", group: "Guided Sessions" },
+    { id: "session-gothic-meditation", label: "Gothic Meditation", group: "Guided Sessions" },
   ];
 
   // Featured Videos state

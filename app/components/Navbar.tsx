@@ -163,6 +163,9 @@ export default function Navbar() {
             <Link href="/sessions/dark-calm" onClick={closeMenu}>
               Dark Calm
             </Link>
+            <Link href="/sessions/gothic-meditation" onClick={closeMenu}>
+              Gothic Meditation
+            </Link>
             <Link href="/sessions" onClick={closeMenu}>
               All Sessions
             </Link>
