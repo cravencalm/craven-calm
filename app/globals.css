@@ -53,11 +53,12 @@ h1, h2, h3, .logo {
     z-index: 100;
 }
 
-.logo-link img, .logo-img {
+.logo-link img, .logo-img, img[src*="final_logo_v7.png"] {
     height: 90px;
     width: auto;
-    mix-blend-mode: screen; 
-    filter: contrast(2) brightness(1.1); 
+    mix-blend-mode: screen !important; 
+    filter: contrast(5) brightness(1.1) !important; 
+    background: transparent !important;
 }
 .logo {
     font-size: 0.9rem;
