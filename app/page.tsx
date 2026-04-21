@@ -62,7 +62,12 @@ export default function Home() {
     }
     async function fetchFeaturedBooks() {
       try {
-        const { data, error } = await supabase.from("books").select("*").eq("is_featured", true).order("id", { ascending: false });
+        const { data, error } = await supabase
+          .from("books")
+          .select("*")
+          .eq("is_featured", true)
+          .order("id", { ascending: false })
+          .limit(4);
         if (data && !error) setFeaturedBooks(data);
       } catch (_) {}
     }
