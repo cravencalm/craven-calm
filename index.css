@@ -47,8 +47,10 @@ h1, h2, h3, .logo {
 }
 
 .logo-img {
-    height: 22px;
-    mix-blend-mode: lighten;
+    height: 90px;
+    width: auto;
+    mix-blend-mode: screen; 
+    filter: contrast(2) brightness(1.1); 
 }
 .logo {
     font-size: 0.9rem;
