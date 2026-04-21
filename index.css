@@ -46,7 +46,7 @@ h1, h2, h3, .logo {
     z-index: 100;
 }
 
-.logo-img {
+.logo-link img, .logo-img {
     height: 90px;
     width: auto;
     mix-blend-mode: screen; 
