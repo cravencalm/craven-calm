@@ -19,6 +19,7 @@ type Product = {
   audio_length: string;
   is_physical?: boolean;
   category?: string | null;
+  tracks?: { name: string; url: string; duration?: string }[] | null;
 };
 
 type FeaturedVideo = {
@@ -166,7 +167,7 @@ export default function Home() {
                     {product.mp3_preview_url && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                           <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Audio Preview</p>
-                          <AudioPlayer src={product.mp3_preview_url} />
+                          <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
                       </div>
                     )}
                     <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
@@ -209,7 +210,7 @@ export default function Home() {
                     {product.mp3_preview_url && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                           <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Artwork Preview</p>
-                          <AudioPlayer src={product.mp3_preview_url} />
+                          <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
                       </div>
                     )}
                     <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
