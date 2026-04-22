@@ -13,6 +13,7 @@ type Product = {
   audio_length: string | null;
   is_physical?: boolean;
   category?: string | null;
+  tracks?: { name: string; url: string; duration?: string }[] | null;
 };
 
 interface ProductGalleryProps {
@@ -74,11 +75,11 @@ export default function ProductGallery({ products, loading, emptyMessage = "No p
                 )}
 
                 {product.mp3_preview_url && (
-                  <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                  <div style={{ marginTop: "1rem" }}>
                     <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>
                       {product.is_physical ? "Artwork Preview" : "Audio Preview"}
                     </p>
-                    <AudioPlayer src={product.mp3_preview_url} />
+                    <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
                   </div>
                 )}
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import JSZip from "jszip";
 import type { Session } from "@supabase/supabase-js";
 
 type Product = {
@@ -15,6 +16,7 @@ type Product = {
   audio_length: string | null;
   is_physical?: boolean;
   category?: string | null;
+  tracks?: { name: string; url: string; duration?: string }[] | null;
 };
 
 type FeaturedVideo = {
@@ -60,6 +62,10 @@ export default function AdminDashboard() {
   const [mp3Url, setMp3Url] = useState("");
   const [zipUrl, setZipUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [productTracks, setProductTracks] = useState<{ name: string; url: string; duration?: string }[]>([]);
+  const [pendingZipFile, setPendingZipFile] = useState<File | null>(null);
+  const [hostingMode, setHostingMode] = useState<"supabase" | "external">("supabase");
+  const [manualBaseUrl, setManualBaseUrl] = useState("");
 
   // Gelato / Physical state
   const [isPhysical, setIsPhysical] = useState(false);
@@ -162,6 +168,7 @@ export default function AdminDashboard() {
       setImageUrl(product.image_url || "");
       setAudioLength(product.audio_length || "");
       setIsPhysical(product.is_physical || false);
+      setProductTracks(product.tracks || []);
       const catArray = product.category ? product.category.split(',').map(c => c.trim()) : ["gothic"];
       setSelectedCategories(catArray);
     } else {
@@ -176,6 +183,7 @@ export default function AdminDashboard() {
     setEditingId(null);
     setProductName("");
     setProductPrice("");
+    setProductTracks([]);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: "mp3" | "zip" | "image") => {
@@ -191,9 +199,161 @@ export default function AdminDashboard() {
     const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
     const uploadedUrl = publicUrlData.publicUrl;
     if (fileType === "mp3") setMp3Url(uploadedUrl);
-    if (fileType === "zip") setZipUrl(uploadedUrl);
+    if (fileType === "zip") {
+      setZipUrl(uploadedUrl);
+      setPendingZipFile(file);
+    }
     if (fileType === "image") setImageUrl(uploadedUrl);
     setStatus(`Successfully uploaded ${file.name}`);
+  };
+
+  const handleMultiTrackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setStatus(`Processing ${files.length} tracks...`);
+    const newTracks = [...productTracks];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop();
+      const cleanName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      const fileName = `${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
+      const filePath = `products/tracks/${fileName}`;
+
+      setStatus(`Uploading ${i + 1}/${files.length}: ${file.name}...`);
+      
+      const { error } = await supabase.storage.from("products_media").upload(filePath, file);
+      if (error) {
+        console.error("Upload error:", error);
+        continue;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
+      newTracks.push({
+        name: cleanName,
+        url: publicUrlData.publicUrl
+      });
+    }
+
+    setProductTracks(newTracks);
+    setStatus(`Successfully added ${files.length} tracks to the playlist.`);
+  };
+
+  const handleExtractFromZip = async () => {
+    let zipData: ArrayBuffer | Blob | null = null;
+
+    if (pendingZipFile) {
+      zipData = pendingZipFile;
+    } else if (zipUrl) {
+      setStatus("Fetching existing ZIP file...");
+      try {
+        const response = await fetch(zipUrl);
+        if (!response.ok) throw new Error("Could not fetch ZIP from URL.");
+        zipData = await response.blob();
+      } catch (err) {
+        setStatus(`Error fetching ZIP: ${(err as Error).message}. Make sure CORS is allowed or try re-uploading the ZIP.`);
+        return;
+      }
+    }
+
+    if (!zipData) {
+      setStatus("No ZIP file found to extract from.");
+      return;
+    }
+
+    setStatus("✨ Unzipping and scanning for tracks...");
+    const zip = new JSZip();
+    const contents = await zip.loadAsync(zipData);
+    const audioFiles = Object.keys(contents.files).filter(name => name.toLowerCase().endsWith(".mp3") && !name.startsWith("__MACOSX"));
+
+    if (audioFiles.length === 0) {
+      setStatus("No MP3 files found in the ZIP.");
+      return;
+    }
+
+    setStatus(`Found ${audioFiles.length} tracks. Starting magic extraction...`);
+    const newTracks = [...productTracks];
+
+    for (let i = 0; i < audioFiles.length; i++) {
+      const fileName = audioFiles[i];
+      const fileData = await contents.files[fileName].async("blob");
+      
+      // Clean up name: remove path and extension
+      const baseName = fileName.split('/').pop() || fileName;
+      const cleanName = baseName.replace(/\.[^/.]+$/, "");
+
+      const storeName = `${Math.random().toString(36).substring(2, 11)}_${Date.now()}.mp3`;
+      const filePath = `products/tracks/${storeName}`;
+
+      setStatus(`Uploading (${i + 1}/${audioFiles.length}): ${cleanName}...`);
+
+      const { error } = await supabase.storage.from("products_media").upload(filePath, fileData);
+      if (error) {
+        console.error("Upload error:", error);
+        continue;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
+      newTracks.push({
+        name: cleanName,
+        url: publicUrlData.publicUrl
+      });
+    }
+
+    setProductTracks(newTracks);
+    setStatus(`✅ Successfully extracted ${audioFiles.length} tracks into the playlist!`);
+  };
+
+  const handleScanLocalZip = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const inputElement = e.target;
+    if (!file) return;
+    
+    if (!manualBaseUrl) {
+      alert("Please enter a Base URL first so I know where the tracks will be hosted.");
+      inputElement.value = "";
+      return;
+    }
+
+    try {
+      setStatus("🔍 Scanning ZIP for filenames...");
+      const zip = new JSZip();
+      const contents = await zip.loadAsync(file);
+      const audioFiles = Object.keys(contents.files)
+        .filter(name => name.toLowerCase().endsWith(".mp3") && !name.startsWith("__MACOSX"))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+      if (audioFiles.length === 0) {
+        setStatus("❌ No MP3 files found in the ZIP.");
+        inputElement.value = "";
+        return;
+      }
+
+      let formattedBaseUrl = manualBaseUrl.trim();
+      if (!/^https?:\/\//i.test(formattedBaseUrl)) {
+        formattedBaseUrl = `https://${formattedBaseUrl}`;
+      }
+      const baseUrl = formattedBaseUrl.endsWith("/") ? formattedBaseUrl : `${formattedBaseUrl}/`;
+      const safeBaseUrl = encodeURI(baseUrl);
+
+      const newTracks = audioFiles.map(fileName => {
+        const baseName = fileName.split('/').pop() || fileName;
+        const cleanName = baseName.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+        return {
+          name: cleanName,
+          url: `${safeBaseUrl}${encodeURIComponent(baseName)}`
+        };
+      });
+
+      setProductTracks([...productTracks, ...newTracks]);
+      setStatus(`✅ Generated ${newTracks.length} tracks pointing to your external host.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`❌ Error reading ZIP: ${(err as Error).message}. Make sure it is a valid ZIP file.`);
+    } finally {
+      inputElement.value = "";
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -222,7 +382,8 @@ export default function AdminDashboard() {
       zip_file_url: zipUrl || null, 
       image_url: imageUrl || null,
       is_physical: isPhysical,
-      category: selectedCategories.join(",")
+      category: selectedCategories.join(","),
+      tracks: productTracks
     };
 
     if (editingId) {
@@ -481,10 +642,116 @@ export default function AdminDashboard() {
             {mp3Url && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>{editingId ? "MP3 is set. Upload a new one to overwrite." : "MP3 ready!"}</p>}
           </div>
           <div style={{ padding: "1rem", background: "#0a0a0c", border: "1px dashed #333" }}>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>External ZIP File Link (Google Drive, Dropbox, etc.)</label>
-            <input type="url" value={zipUrl} onChange={e => setZipUrl(e.target.value)} placeholder="e.g. https://drive.google.com/file/d/..." style={inputStyle} />
-            {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>Link attached!</p>}
+            <label style={{ display: "block", marginBottom: "0.5rem" }}>Upload High-Res ZIP (Product File) {zipUrl && "- Current File Active"}</label>
+            <input type="file" accept=".zip" onChange={e => handleFileUpload(e, "zip")} style={{ color: "var(--accent-color)", width: "100%" }} />
+            {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>{editingId ? "ZIP is set. Upload a new one to overwrite." : "ZIP ready!"}</p>}
           </div>
+
+          {/* PLAYLIST MANAGER */}
+          {!isPhysical && (
+            <div style={{ padding: "1.5rem", background: "#0a0a0c", border: "1px solid #333", borderRadius: "4px" }}>
+              <label style={{ display: "block", marginBottom: "1rem", fontWeight: "bold", borderBottom: "1px solid #333", paddingBottom: "0.5rem", color: "var(--accent-color)" }}>Album Playlist Manager</label>
+              
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem", borderBottom: "1px solid #222", paddingBottom: "1rem" }}>
+                <button type="button" onClick={() => setHostingMode("supabase")} style={{ flex: 1, padding: "0.6rem", background: hostingMode === "supabase" ? "var(--accent-color)" : "transparent", color: hostingMode === "supabase" ? "#000" : "var(--text-color)", border: "1px solid var(--accent-color)", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}>Supabase Hosting (Upload)</button>
+                <button type="button" onClick={() => setHostingMode("external")} style={{ flex: 1, padding: "0.6rem", background: hostingMode === "external" ? "var(--accent-color)" : "transparent", color: hostingMode === "external" ? "#000" : "var(--text-color)", border: "1px solid var(--accent-color)", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}>External Hosting (FTP/Own Site)</button>
+              </div>
+              
+              {hostingMode === "supabase" ? (
+                <>
+                  <div style={{ marginBottom: "1.5rem" }}>
+                    <p style={{ fontSize: "0.85rem", opacity: 0.7, marginBottom: "1rem" }}>Upload multiple MP3s. Filenames will automatically become track titles.</p>
+                    <div style={{ position: "relative", padding: "2rem", border: "2px dashed #444", textAlign: "center", cursor: "pointer", transition: "border-color 0.2s" }} onMouseOver={e => e.currentTarget.style.borderColor = "var(--accent-color)"} onMouseOut={e => e.currentTarget.style.borderColor = "#444"}>
+                      <input 
+                        type="file" 
+                        multiple 
+                        accept=".mp3" 
+                        onChange={handleMultiTrackUpload} 
+                        style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }} 
+                      />
+                      <p style={{ margin: 0, color: "var(--accent-color)" }}>Click or Drag MP3s here to add to playlist</p>
+                    </div>
+                  </div>
+
+                  {(zipUrl || pendingZipFile) && (
+                    <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "rgba(227, 169, 104, 0.05)", border: "1px solid var(--accent-color)", borderRadius: "4px" }}>
+                      <p style={{ fontSize: "0.85rem", color: "var(--accent-color)", fontWeight: "bold", marginBottom: "0.5rem" }}>📦 ZIP File Detected</p>
+                      <p style={{ fontSize: "0.8rem", opacity: 0.8, marginBottom: "1rem" }}>Would you like to automatically extract and upload all tracks from this ZIP into the playlist?</p>
+                      <button 
+                        type="button" 
+                        onClick={handleExtractFromZip}
+                        className="btn-action"
+                        style={{ background: "var(--accent-color)", color: "#000", padding: "0.5rem 1rem", fontSize: "0.8rem", width: "auto" }}
+                      >
+                        ✨ Magic Sync: Auto-Extract Tracks
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "rgba(255,255,255,0.03)", border: "1px solid #333" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Base URL (e.g., https://yourdomain.com/music/album/)</label>
+                  <input 
+                    placeholder="https://..." 
+                    value={manualBaseUrl} 
+                    onChange={e => setManualBaseUrl(e.target.value)} 
+                    style={{ ...inputStyle, marginBottom: "1rem" }} 
+                  />
+                  <p style={{ fontSize: "0.8rem", opacity: 0.7, marginBottom: "1rem" }}>Upload your folder of MP3s to your FTP first, then scan your local ZIP below to build the links.</p>
+                  <div style={{ position: "relative", padding: "1rem", border: "1px dashed #555", textAlign: "center" }}>
+                    <input 
+                      type="file" 
+                      accept=".zip" 
+                      onChange={handleScanLocalZip}
+                      style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%" }} 
+                    />
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--accent-color)" }}>🔍 Scan Local ZIP for Filenames</p>
+                  </div>
+                </div>
+              )}
+
+              {productTracks.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                    <p style={{ fontSize: "0.8rem", fontWeight: "bold", margin: 0 }}>Playlist Preview ({productTracks.length} tracks):</p>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (confirm("Are you sure you want to clear all tracks from this playlist?")) {
+                          setProductTracks([]);
+                        }
+                      }}
+                      style={{ background: "transparent", color: "#f44336", border: "1px solid #f44336", fontSize: "0.75rem", padding: "0.2rem 0.5rem", cursor: "pointer", borderRadius: "3px" }}
+                    >
+                      Clear All Tracks
+                    </button>
+                  </div>
+                  {productTracks.map((track, idx) => (
+                    <div key={idx} style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#111", padding: "0.6rem 1rem", border: "1px solid #222" }}>
+                      <span style={{ fontSize: "0.8rem", opacity: 0.5 }}>{idx + 1}</span>
+                      <input 
+                        value={track.name} 
+                        onChange={(e) => {
+                          const updated = [...productTracks];
+                          updated[idx].name = e.target.value;
+                          setProductTracks(updated);
+                        }}
+                        style={{ background: "transparent", border: "none", borderBottom: "1px solid #333", color: "#fff", fontSize: "0.9rem", flex: 1, padding: "0.2rem" }}
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setProductTracks(productTracks.filter((_, i) => i !== idx))}
+                        style={{ background: "transparent", color: "#f44336", border: "none", fontSize: "1.2rem", cursor: "pointer", padding: "0 0.5rem" }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <p style={{ fontSize: "0.75rem", color: "#666", marginTop: "0.5rem", fontStyle: "italic" }}>You can edit track names directly above.</p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div style={{ padding: "1.5rem", background: "var(--card-bg)", border: "1px solid #333" }}>
             <label style={{ display: "block", marginBottom: "1rem", fontWeight: "bold", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>Product Categories</label>
