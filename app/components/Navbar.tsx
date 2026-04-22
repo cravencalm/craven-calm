@@ -64,9 +64,42 @@ export default function Navbar() {
         <Link href="/sanctuary" onClick={closeMenu}>
           Sanctuary
         </Link>
-        <Link href="/books" onClick={closeMenu}>
-          Books
-        </Link>
+        <div
+          className={`nav-item-wrapper ${
+            activeDropdown === "books" ? "active" : ""
+          }`}
+        >
+          <Link
+            href="/books"
+            onClick={(e) => {
+              if (window.innerWidth <= 768) {
+                e.preventDefault();
+                toggleDropdown("books");
+              } else {
+                closeMenu();
+              }
+            }}
+          >
+            Books <span className="nav-arrow">▼</span>
+          </Link>
+          <div className="nav-dropdown">
+            <Link href="/books/horror" onClick={closeMenu}>
+              Horror
+            </Link>
+            <Link href="/books/meditation" onClick={closeMenu}>
+              Meditation
+            </Link>
+            <Link href="/books/mystery" onClick={closeMenu}>
+              Mystery
+            </Link>
+            <Link href="/books/western" onClick={closeMenu}>
+              Western
+            </Link>
+            <Link href="/books" onClick={closeMenu}>
+              All Volumes
+            </Link>
+          </div>
+        </div>
 
         <div
           className={`nav-item-wrapper ${

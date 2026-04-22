@@ -54,7 +54,7 @@ export default function BooksPage() {
             if (catBooks.length === 0) return null;
 
             return (
-              <div key={cat} style={{ marginTop: "4rem" }}>
+              <div key={cat} id={cat.toLowerCase()} style={{ marginTop: "4rem" }}>
                 <div className="section-divider">
                   <span className="ornament left">&#10086;</span>
                   <h2>{cat}</h2>
