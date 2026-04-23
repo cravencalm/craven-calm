@@ -164,10 +164,10 @@ export default function Home() {
                         ⏱️ {product.audio_length}
                       </p>
                     )}
-                    {product.mp3_preview_url && (
+                    {(product.mp3_preview_url || (product.tracks && product.tracks.length > 0)) && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                           <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Audio Preview</p>
-                          <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
+                          <AudioPlayer src={product.mp3_preview_url || undefined} tracks={product.tracks || []} />
                       </div>
                     )}
                     <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
@@ -207,10 +207,10 @@ export default function Home() {
                   <div className="product-info">
                     <h3>{product.name}</h3>
                     <p className="sub-text">Physical Metal Poster</p>
-                    {product.mp3_preview_url && (
+                    {(product.mp3_preview_url || (product.tracks && product.tracks.length > 0)) && (
                       <div style={{ marginBottom: "1rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                           <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>Artwork Preview</p>
-                          <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
+                          <AudioPlayer src={product.mp3_preview_url || undefined} tracks={product.tracks || []} />
                       </div>
                     )}
                     <button className="btn-buy stripe-buy" onClick={() => handleCheckout(product.id.toString())}>
