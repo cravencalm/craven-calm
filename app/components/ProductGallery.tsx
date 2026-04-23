@@ -74,12 +74,12 @@ export default function ProductGallery({ products, loading, emptyMessage = "No p
                   </p>
                 )}
 
-                {product.mp3_preview_url && (
+                {(product.mp3_preview_url || (product.tracks && product.tracks.length > 0)) && (
                   <div style={{ marginTop: "1rem" }}>
                     <p style={{ fontSize: "0.8rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>
                       {product.is_physical ? "Artwork Preview" : "Audio Preview"}
                     </p>
-                    <AudioPlayer src={product.mp3_preview_url} tracks={product.tracks || []} />
+                    <AudioPlayer src={product.mp3_preview_url || undefined} tracks={product.tracks || []} />
                   </div>
                 )}
 
