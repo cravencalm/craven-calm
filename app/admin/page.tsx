@@ -642,9 +642,15 @@ export default function AdminDashboard() {
             {mp3Url && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>{editingId ? "MP3 is set. Upload a new one to overwrite." : "MP3 ready!"}</p>}
           </div>
           <div style={{ padding: "1rem", background: "#0a0a0c", border: "1px dashed #333" }}>
-            <label style={{ display: "block", marginBottom: "0.5rem" }}>Upload High-Res ZIP (Product File) {zipUrl && "- Current File Active"}</label>
-            <input type="file" accept=".zip" onChange={e => handleFileUpload(e, "zip")} style={{ color: "var(--accent-color)", width: "100%" }} />
-            {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem" }}>{editingId ? "ZIP is set. Upload a new one to overwrite." : "ZIP ready!"}</p>}
+            <label style={{ display: "block", marginBottom: "0.5rem" }}>High-Res ZIP / Google Drive Link {zipUrl && "- Current Link Active"}</label>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <input type="url" placeholder="Paste Google Drive or external link here..." value={zipUrl} onChange={e => setZipUrl(e.target.value)} style={inputStyle} />
+              <div style={{ borderTop: "1px solid #333", paddingTop: "1rem" }}>
+                <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.8rem", color: "var(--accent-color)" }}>Or Upload ZIP File to Supabase:</p>
+                <input type="file" accept=".zip" onChange={e => handleFileUpload(e, "zip")} style={{ color: "var(--accent-color)", width: "100%" }} />
+              </div>
+            </div>
+            {zipUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem", wordBreak: "break-all" }}>{editingId ? "File/Link is set." : "File/Link ready!"} <br/><span style={{opacity: 0.7}}>{zipUrl}</span></p>}
           </div>
 
           {/* PLAYLIST MANAGER */}

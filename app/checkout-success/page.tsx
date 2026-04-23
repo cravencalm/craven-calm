@@ -82,7 +82,7 @@ function CheckoutSuccessContent() {
                     className="btn-action" 
                     style={{ textDecoration: "none", width: "100%", maxWidth: "300px", background: "var(--accent-color)", color: "#000" }}
                   >
-                    Download High-Res ZIP
+                    Access Digital Download
                   </a>
                 )}
               </div>
