@@ -138,6 +138,12 @@ export default function Navbar() {
             <Link href="/music/uplifting" onClick={closeMenu}>
               Uplifting Collection
             </Link>
+            <Link href="/music/hip-hop" onClick={closeMenu}>
+              Hip Hop
+            </Link>
+            <Link href="/music/blues" onClick={closeMenu}>
+              Blues
+            </Link>
             <Link href="/music" onClick={closeMenu}>
               All Releases
             </Link>

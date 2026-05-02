@@ -60,6 +60,8 @@ export default function MusicPage() {
   const worldMusicProducts = getByCategory('world-music');
   const meditationProducts = getByCategory('meditation');
   const upliftingProducts = getByCategory('uplifting');
+  const hipHopProducts = getByCategory('hip-hop');
+  const bluesProducts = getByCategory('blues');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -68,7 +70,9 @@ export default function MusicPage() {
            !cats.includes('western') && 
            !cats.includes('world-music') &&
            !cats.includes('meditation') &&
-           !cats.includes('uplifting');
+           !cats.includes('uplifting') &&
+           !cats.includes('hip-hop') &&
+           !cats.includes('blues');
   });
 
   return (
@@ -162,6 +166,34 @@ export default function MusicPage() {
             products={upliftingProducts} 
             loading={loading} 
             emptyMessage="The soul's elevation begins here... no releases yet." 
+          />
+        </div>
+
+        {/* Hip Hop Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Hip Hop</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={hipHopProducts} 
+            loading={loading} 
+            emptyMessage="The rhythm drops here... no releases yet." 
+          />
+        </div>
+
+        {/* Blues Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Blues</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={bluesProducts} 
+            loading={loading} 
+            emptyMessage="The soulful blues... no releases yet." 
           />
         </div>
 
