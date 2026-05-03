@@ -99,7 +99,7 @@ export default function Home() {
 
       <header className="hero">
         <div className="hero-content">
-          <h1 className="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
+          <h1 className="hero-title">Stay calm in the darkness, stay calm in the light. 𓆩♱𓆪🖤🧘‍♂️</h1>
           <div className="hero-divider"></div>
           <p className="hero-subtitle">Uplifting & Gothic journeys for deep rest🌙🌙</p>
         </div>
