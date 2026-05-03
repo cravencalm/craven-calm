@@ -101,7 +101,7 @@ export default function Home() {
         <div className="hero-content">
           <h1 className="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
           <div className="hero-divider"></div>
-          <p className="hero-subtitle">Uplifting & Gothic journeys for deep rest🌙🌙</p>
+          <p className="hero-subtitle">Stay calm in the darkness, stay calm in the light. 𓆩♱𓆪🖤🧘‍♂️🌙🌙</p>
         </div>
       </header>
 
