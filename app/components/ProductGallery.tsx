@@ -69,14 +69,14 @@ export default function ProductGallery({ products, loading, emptyMessage = "No p
                 </div>
 
                 {product.audio_length && !product.is_physical && (
-                  <p style={{ fontSize: "1rem", color: "var(--accent-hover)", marginBottom: "1rem", fontStyle: "italic" }}>
+                  <p className="audio-length-text">
                     ⏱️ {product.audio_length}
                   </p>
                 )}
 
                 {(product.mp3_preview_url || (product.tracks && product.tracks.length > 0)) && (
                   <div style={{ marginTop: "1rem" }}>
-                    <p style={{ fontSize: "1.1rem", color: "var(--accent-color)", fontStyle: "italic", marginBottom: "0.5rem" }}>
+                    <p className="preview-label">
                       {product.is_physical ? "Artwork Preview" : "Audio Preview"}
                     </p>
                     <AudioPlayer src={product.mp3_preview_url || undefined} tracks={product.tracks || []} />
