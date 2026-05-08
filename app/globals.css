@@ -737,15 +737,15 @@ footer {
     .logo { font-size: 0.6rem; }
 
     /* Increase font sizes for readability on mobile */
-    .sub-text { font-size: 1.1rem; }
-    .current-track-name { font-size: 1.3rem; }
-    .time-display { font-size: 1.1rem; }
-    .tracklist-toggle { font-size: 1.1rem; }
-    .tracklist-item .track-number { font-size: 1.1rem; }
-    .tracklist-item .track-name { font-size: 1.2rem; }
-    .playing-indicator { font-size: 0.9rem; }
-    .preview-label { font-size: 1.3rem; }
-    .audio-length-text { font-size: 1.2rem; }
+    .sub-text { font-size: 1.3rem; }
+    .current-track-name { font-size: 1.5rem; }
+    .time-display { font-size: 1.25rem; }
+    .tracklist-toggle { font-size: 1.3rem; }
+    .tracklist-item .track-number { font-size: 1.25rem; }
+    .tracklist-item .track-name { font-size: 1.4rem; }
+    .playing-indicator { font-size: 1.1rem; }
+    .preview-label { font-size: 1.5rem; }
+    .audio-length-text { font-size: 1.4rem; }
 }
 
 .menu-toggle {
