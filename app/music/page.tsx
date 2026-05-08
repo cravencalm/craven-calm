@@ -62,6 +62,7 @@ export default function MusicPage() {
   const upliftingProducts = getByCategory('uplifting');
   const hipHopProducts = getByCategory('hip-hop');
   const bluesProducts = getByCategory('blues');
+  const loFiProducts = getByCategory('lo-fi');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -72,7 +73,8 @@ export default function MusicPage() {
            !cats.includes('meditation') &&
            !cats.includes('uplifting') &&
            !cats.includes('hip-hop') &&
-           !cats.includes('blues');
+           !cats.includes('blues') &&
+           !cats.includes('lo-fi');
   });
 
   return (
@@ -194,6 +196,20 @@ export default function MusicPage() {
             products={bluesProducts} 
             loading={loading} 
             emptyMessage="The soulful blues... no releases yet." 
+          />
+        </div>
+
+        {/* Lo-fi Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Lo-fi</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={loFiProducts} 
+            loading={loading} 
+            emptyMessage="The chill lo-fi beats... no releases yet." 
           />
         </div>
 

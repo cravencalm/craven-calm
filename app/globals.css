@@ -416,7 +416,7 @@ main {
 }
 
 .sub-text {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: #888;
     margin-bottom: 1rem;
 }
@@ -802,7 +802,7 @@ footer {
 }
 .current-track-name {
     font-family: var(--font-subheading);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-style: italic;
     color: var(--accent-color);
     opacity: 0.9;
@@ -824,7 +824,7 @@ footer {
 .time-display {
     display: flex;
     justify-content: flex-end;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     opacity: 0.5;
     font-family: var(--font-body);
 }
@@ -833,7 +833,7 @@ footer {
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-color);
     font-family: var(--font-heading);
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0.4rem 0.8rem;
@@ -870,12 +870,12 @@ footer {
     background: rgba(227, 169, 104, 0.1);
 }
 .tracklist-item .track-number {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     opacity: 0.4;
     width: 20px;
 }
 .tracklist-item .track-name {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     flex: 1;
     color: var(--text-color);
 }
@@ -884,7 +884,7 @@ footer {
     font-weight: bold;
 }
 .playing-indicator {
-    font-size: 0.6rem;
+    font-size: 0.8rem;
     color: var(--accent-color);
     text-transform: uppercase;
     letter-spacing: 0.1em;
