@@ -122,6 +122,20 @@ h1, h2, h3, .logo {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
     z-index: 1000;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Custom Scrollbar for Dropdown */
+.nav-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.nav-dropdown::-webkit-scrollbar-track {
+    background: rgba(18, 18, 26, 0.98);
+}
+.nav-dropdown::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 3px;
 }
 
 .nav-item-wrapper:hover .nav-dropdown {
@@ -733,8 +747,18 @@ footer {
         padding: 0.5rem;
     }
 
-    .logo-img { height: 45px; }
+    .logo-link img, .logo-img, img[src*="final_logo_v7.png"] { height: 45px !important; }
     .logo { font-size: 0.6rem; }
+
+    /* Fix header spacing and alignment */
+    .navbar {
+        padding: 1rem 5%;
+        align-items: center;
+    }
+
+    /* Adjust hero text sizes for mobile */
+    .hero-title { font-size: 1.8rem; line-height: 1.2; }
+    .hero-subtitle { font-size: 1.2rem; margin-top: 0.5rem; }
 
     /* Increase font sizes for readability on mobile */
     .sub-text { font-size: 1.3rem; }
