@@ -81,6 +81,7 @@ export default function AdminDashboard() {
     { id: "hip-hop", label: "Hip Hop", group: "Music Releases" },
     { id: "blues", label: "Blues", group: "Music Releases" },
     { id: "lo-fi", label: "Lo-fi", group: "Music Releases" },
+    { id: "psychill", label: "Psychill", group: "Music Releases" },
     { id: "wall-art", label: "Wall-Art", group: "Artwork" },
     { id: "mobile-wallpaper", label: "Mobile Wallpapers", group: "Artwork" },
     { id: "limited-print", label: "Limited Print", group: "Artwork" },

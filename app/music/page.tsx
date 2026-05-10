@@ -63,6 +63,7 @@ export default function MusicPage() {
   const hipHopProducts = getByCategory('hip-hop');
   const bluesProducts = getByCategory('blues');
   const loFiProducts = getByCategory('lo-fi');
+  const psychillProducts = getByCategory('psychill');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -74,7 +75,8 @@ export default function MusicPage() {
            !cats.includes('uplifting') &&
            !cats.includes('hip-hop') &&
            !cats.includes('blues') &&
-           !cats.includes('lo-fi');
+           !cats.includes('lo-fi') &&
+           !cats.includes('psychill');
   });
 
   return (
@@ -210,6 +212,20 @@ export default function MusicPage() {
             products={loFiProducts} 
             loading={loading} 
             emptyMessage="The chill lo-fi beats... no releases yet." 
+          />
+        </div>
+
+        {/* Psychill Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Psychill</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={psychillProducts} 
+            loading={loading} 
+            emptyMessage="The deep psychill vibes... no releases yet." 
           />
         </div>
 

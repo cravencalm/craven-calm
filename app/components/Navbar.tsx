@@ -147,6 +147,9 @@ export default function Navbar() {
             <Link href="/music/lo-fi" onClick={closeMenu}>
               Lo-fi
             </Link>
+            <Link href="/music/psychill" onClick={closeMenu}>
+              Psychill
+            </Link>
             <Link href="/music" onClick={closeMenu}>
               All Releases
             </Link>
