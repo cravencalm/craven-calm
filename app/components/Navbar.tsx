@@ -150,6 +150,9 @@ export default function Navbar() {
             <Link href="/music/psychill" onClick={closeMenu}>
               Psychill
             </Link>
+            <Link href="/music/chillwave" onClick={closeMenu}>
+              Chillwave
+            </Link>
             <Link href="/music" onClick={closeMenu}>
               All Releases
             </Link>

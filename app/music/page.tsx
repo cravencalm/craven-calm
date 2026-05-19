@@ -64,6 +64,7 @@ export default function MusicPage() {
   const bluesProducts = getByCategory('blues');
   const loFiProducts = getByCategory('lo-fi');
   const psychillProducts = getByCategory('psychill');
+  const chillwaveProducts = getByCategory('chillwave');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -76,7 +77,8 @@ export default function MusicPage() {
            !cats.includes('hip-hop') &&
            !cats.includes('blues') &&
            !cats.includes('lo-fi') &&
-           !cats.includes('psychill');
+           !cats.includes('psychill') &&
+           !cats.includes('chillwave');
   });
 
   return (
@@ -226,6 +228,20 @@ export default function MusicPage() {
             products={psychillProducts} 
             loading={loading} 
             emptyMessage="The deep psychill vibes... no releases yet." 
+          />
+        </div>
+
+        {/* Chillwave Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Chillwave</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={chillwaveProducts} 
+            loading={loading} 
+            emptyMessage="The nostalgic chillwave vibes... no releases yet." 
           />
         </div>
 
