@@ -64,6 +64,9 @@ export default function Navbar() {
         <Link href="/sanctuary" onClick={closeMenu}>
           Sanctuary
         </Link>
+        <Link href="/radio" onClick={closeMenu}>
+          Radio
+        </Link>
         <div
           className={`nav-item-wrapper ${
             activeDropdown === "books" ? "active" : ""
@@ -120,6 +123,9 @@ export default function Navbar() {
             Music <span className="nav-arrow">▼</span>
           </Link>
           <div className="nav-dropdown">
+            <Link href="/radio" onClick={closeMenu} style={{ color: "var(--accent-color)", fontWeight: "bold" }}>
+              Sanctuary Radio 📻
+            </Link>
             <Link href="/music/gothic" onClick={closeMenu}>
               Gothic Collection
             </Link>
