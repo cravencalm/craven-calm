@@ -102,12 +102,125 @@ export default function Home() {
           <h1 className="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
           <div className="hero-divider"></div>
           <p className="hero-subtitle">Stay calm in the darkness, stay calm in the light. 𓆩♱𓆪🖤🧘‍♂️🌙🌙</p>
+          <div style={{ marginTop: "2rem" }}>
+            <a href="/radio" className="btn-action" style={{ 
+              textDecoration: "none", 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "0.8rem", 
+              border: "1px solid var(--accent-color)", 
+              color: "var(--accent-color)", 
+              background: "rgba(0,0,0,0.4)",
+              fontSize: "1rem",
+              padding: "0.8rem 2rem",
+              fontWeight: "bold",
+              letterSpacing: "0.08em"
+            }}>
+              <span className="live-dot" style={{ 
+                width: "8px", 
+                height: "8px", 
+                backgroundColor: "#f44336", 
+                borderRadius: "50%", 
+                display: "inline-block", 
+                boxShadow: "0 0 10px #f44336",
+                animation: "pulse-dot 1.8s infinite"
+              }}></span>
+              TUNE IN TO SANCTUARY RADIO 📻
+            </a>
+          </div>
         </div>
       </header>
 
-      <main>
+      <main style={{ paddingTop: "1rem" }}>
+        {/* Sanctuary Radio Promoted Feature Banner */}
+        <section style={{ maxWidth: "1200px", margin: "0 auto 3rem", padding: "0" }}>
+          <div className="radio-promo-banner" style={{
+            background: "var(--card-bg)",
+            border: "1px solid var(--border-color)",
+            borderTop: "3px solid var(--accent-color)",
+            borderRadius: "6px",
+            padding: "2rem 2.5rem",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "2rem",
+            boxShadow: "inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5)",
+            backdropFilter: "blur(10px)"
+          }}>
+            <div style={{ flex: "1 1 500px" }}>
+              <div style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "0.5rem", 
+                background: "rgba(227, 169, 104, 0.05)", 
+                border: "1px solid rgba(227, 169, 104, 0.2)", 
+                borderRadius: "50px", 
+                padding: "0.2rem 0.8rem", 
+                fontSize: "0.75rem", 
+                fontFamily: "var(--font-heading)", 
+                color: "var(--accent-color)", 
+                fontWeight: "bold", 
+                letterSpacing: "0.08em", 
+                marginBottom: "1rem" 
+              }}>
+                <span className="live-dot" style={{ 
+                  width: "6px", 
+                  height: "6px", 
+                  backgroundColor: "#f44336", 
+                  borderRadius: "50%", 
+                  display: "inline-block", 
+                  boxShadow: "0 0 8px #f44336" 
+                }}></span>
+                NOW BROADCASTING LIVE
+              </div>
+              <h2 style={{ fontFamily: "var(--font-heading)", color: "var(--accent-color)", fontSize: "1.8rem", margin: "0 0 0.8rem 0", letterSpacing: "0.05em" }}>Sanctuary Radio Stream</h2>
+              <p style={{ margin: 0, color: "#a4a195", fontSize: "0.95rem", lineHeight: "1.7" }}>
+                Immerse yourself in a continuous, ambient broadcast of healing frequencies, gothic melodies, and candlelight lo-fi curated directly from the sanctuary. Perfect for deep focus, sleep, or finding calm in the dark hours.
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "center", minWidth: "220px", flex: "1 1 auto" }}>
+              {/* Dynamic decorative visualizer preview */}
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "3px", height: "24px", opacity: 0.6 }}>
+                {Array.from({ length: 14 }).map((_, idx) => (
+                  <div key={idx} style={{
+                    width: "3px",
+                    height: `${8 + (idx % 4) * 4}px`,
+                    backgroundColor: "var(--accent-color)",
+                    borderRadius: "1px"
+                  }}></div>
+                ))}
+              </div>
+              <a href="/radio" className="btn-buy" style={{ 
+                textDecoration: "none", 
+                textAlign: "center", 
+                padding: "0.75rem 2rem", 
+                fontSize: "0.95rem", 
+                letterSpacing: "0.1em", 
+                fontWeight: "bold", 
+                background: "transparent", 
+                color: "var(--accent-color)", 
+                border: "1px solid var(--accent-color)",
+                width: "100%",
+                transition: "all 0.3s ease"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--accent-color)";
+                e.currentTarget.style.color = "#000";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--accent-color)";
+              }}
+              >
+                ENTER THE RADIO 📻
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Features Section */}
-        <section className="features-section">
+        <section className="features-section" style={{ marginTop: "2rem" }}>
           <div className="features-grid">
             <div className="feature-card">
               <h3 className="card-title">Candlelit Reprieve</h3>
