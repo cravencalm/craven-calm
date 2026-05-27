@@ -65,6 +65,7 @@ export default function MusicPage() {
   const loFiProducts = getByCategory('lo-fi');
   const psychillProducts = getByCategory('psychill');
   const chillwaveProducts = getByCategory('chillwave');
+  const slushwaveProducts = getByCategory('slushwave');
 
   const otherProducts = products.filter(p => {
     const cats = (p.category || "").split(",").map((c: string) => c.trim());
@@ -78,7 +79,8 @@ export default function MusicPage() {
            !cats.includes('blues') &&
            !cats.includes('lo-fi') &&
            !cats.includes('psychill') &&
-           !cats.includes('chillwave');
+           !cats.includes('chillwave') &&
+           !cats.includes('slushwave');
   });
 
   return (
@@ -242,6 +244,20 @@ export default function MusicPage() {
             products={chillwaveProducts} 
             loading={loading} 
             emptyMessage="The nostalgic chillwave vibes... no releases yet." 
+          />
+        </div>
+
+        {/* Slushwave Section */}
+        <div style={{ marginTop: "3rem" }}>
+          <div className="section-divider">
+            <span className="ornament left">&#10086;</span>
+            <h2>Slushwave</h2>
+            <span className="ornament right">&#10086;</span>
+          </div>
+          <ProductGallery 
+            products={slushwaveProducts} 
+            loading={loading} 
+            emptyMessage="The dreamy, liquid slushwave soundscapes... no releases yet." 
           />
         </div>
 
