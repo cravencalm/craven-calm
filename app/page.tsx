@@ -102,32 +102,6 @@ export default function Home() {
           <h1 className="hero-title">Healing Music & Dark Academia Art for the Soul</h1>
           <div className="hero-divider"></div>
           <p className="hero-subtitle">Stay calm in the darkness, stay calm in the light. 𓆩♱𓆪🖤🧘‍♂️🌙🌙</p>
-          <div style={{ marginTop: "2rem" }}>
-            <a href="/radio" className="btn-action" style={{ 
-              textDecoration: "none", 
-              display: "inline-flex", 
-              alignItems: "center", 
-              gap: "0.8rem", 
-              border: "1px solid var(--accent-color)", 
-              color: "var(--accent-color)", 
-              background: "rgba(0,0,0,0.4)",
-              fontSize: "1rem",
-              padding: "0.8rem 2rem",
-              fontWeight: "bold",
-              letterSpacing: "0.08em"
-            }}>
-              <span className="live-dot" style={{ 
-                width: "8px", 
-                height: "8px", 
-                backgroundColor: "#f44336", 
-                borderRadius: "50%", 
-                display: "inline-block", 
-                boxShadow: "0 0 10px #f44336",
-                animation: "pulse-dot 1.8s infinite"
-              }}></span>
-              TUNE IN TO SANCTUARY RADIO 📻
-            </a>
-          </div>
         </div>
       </header>
 
