@@ -706,6 +706,11 @@ footer {
 @media (max-width: 1024px) {
     .features-grid { grid-template-columns: repeat(2, 1fr); }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .features-grid .feature-card:last-child {
+        grid-column: span 2;
+        justify-self: center;
+        width: calc(50% - 1rem);
+    }
     .hero { padding-top: 90px; }
     
     .nav-links {
@@ -778,6 +783,10 @@ footer {
 @media (max-width: 768px) {
     .features-grid { grid-template-columns: 1fr; }
     .products-grid { grid-template-columns: 1fr; }
+    .features-grid .feature-card:last-child {
+        grid-column: span 1;
+        width: 100%;
+    }
     .hero { 
         background-position: 35% center; 
         padding-top: 75px;
