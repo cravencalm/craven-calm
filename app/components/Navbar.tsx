@@ -15,7 +15,7 @@ export default function Navbar() {
   };
 
   const toggleDropdown = (name: string) => {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 1024) {
       setActiveDropdown(activeDropdown === name ? null : name);
     }
   };
@@ -23,7 +23,7 @@ export default function Navbar() {
   // Close menu on resize if screen becomes large
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 768 && isOpen) {
+      if (window.innerWidth > 1024 && isOpen) {
         setIsOpen(false);
       }
     };
@@ -75,7 +75,7 @@ export default function Navbar() {
           <Link
             href="/books"
             onClick={(e) => {
-              if (window.innerWidth <= 768) {
+              if (window.innerWidth <= 1024) {
                 e.preventDefault();
                 toggleDropdown("books");
               } else {
@@ -112,7 +112,7 @@ export default function Navbar() {
           <Link
             href="/music"
             onClick={(e) => {
-              if (window.innerWidth <= 768) {
+              if (window.innerWidth <= 1024) {
                 e.preventDefault();
                 toggleDropdown("music");
               } else {
@@ -176,7 +176,7 @@ export default function Navbar() {
           <Link
             href="/art"
             onClick={(e) => {
-              if (window.innerWidth <= 768) {
+              if (window.innerWidth <= 1024) {
                 e.preventDefault();
                 toggleDropdown("art");
               } else {
@@ -207,7 +207,7 @@ export default function Navbar() {
           <Link
             href="/sessions"
             onClick={(e) => {
-              if (window.innerWidth <= 768) {
+              if (window.innerWidth <= 1024) {
                 e.preventDefault();
                 toggleDropdown("sessions");
               } else {
