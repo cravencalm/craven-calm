@@ -250,6 +250,7 @@ h1, h2, h3, .logo {
     background-position: center center;
     border-bottom: none;
     margin-top: 0; /* Ensure no gap between top of page and hero */
+    padding-top: 110px; /* Pushes the hero content down so it starts below the absolute navbar */
 }
 
 .hero::after {
@@ -272,14 +273,15 @@ h1, h2, h3, .logo {
     position: relative;
     z-index: 2;
     background: rgba(0, 0, 0, 0.6);
-    padding: 2rem 4rem;
+    padding: 1.5rem 3rem; /* Reduced from 2rem 4rem for a cleaner layout */
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 30px rgba(227, 169, 104, 0.1);
+    max-width: 90%; /* Ensure it fits nicely without squeezing */
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-size: 2.6rem; /* Reduced from 3.5rem to prevent clashing and look more premium */
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
     letter-spacing: 2px;
 }
@@ -287,12 +289,12 @@ h1, h2, h3, .logo {
 .hero-divider {
     height: 1px;
     background: radial-gradient(circle, var(--accent-color) 0%, transparent 80%);
-    margin: 1.5rem 0;
+    margin: 1.2rem 0;
 }
 
 .hero-subtitle {
     font-family: var(--font-subheading);
-    font-size: 1.8rem;
+    font-size: 1.35rem; /* Reduced from 1.8rem to look more elegant */
     font-style: italic;
     color: var(--accent-hover);
     text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
@@ -704,6 +706,7 @@ footer {
 @media (max-width: 1024px) {
     .features-grid { grid-template-columns: repeat(2, 1fr); }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding-top: 90px; }
     
     .nav-links {
         position: fixed;
@@ -775,7 +778,10 @@ footer {
 @media (max-width: 768px) {
     .features-grid { grid-template-columns: 1fr; }
     .products-grid { grid-template-columns: 1fr; }
-    .hero { background-position: 35% center; } /* Show the moons on the left */
+    .hero { 
+        background-position: 35% center; 
+        padding-top: 75px;
+    } /* Show the moons on the left */
     .hero-content { padding: 1.5rem 1rem; width: 90%; } /* Ensure it fits narrow screens */
     .hero-title { font-size: 2.2rem; } /* Slightly smaller to prevent text break issues */
     
