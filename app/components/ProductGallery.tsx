@@ -70,7 +70,9 @@ export default function ProductGallery({ products, loading, emptyMessage = "No p
 
                 {product.audio_length && !product.is_physical && (
                   <p className="audio-length-text">
-                    ⏱️ {product.audio_length}
+                    {(product.category || "").split(",").map(c => c.trim()).includes("ebook") 
+                      ? `✍️ by ${product.audio_length}` 
+                      : `⏱️ ${product.audio_length}`}
                   </p>
                 )}
 
@@ -87,7 +89,11 @@ export default function ProductGallery({ products, loading, emptyMessage = "No p
                   className="btn-buy stripe-buy"
                   onClick={() => handleCheckout(product.id.toString())}
                 >
-                  {product.is_physical ? "Buy Metal Poster" : "Buy MP3/ZIP"}
+                  {product.is_physical 
+                    ? "Buy Metal Poster" 
+                    : ((product.category || "").split(",").map(c => c.trim()).includes("ebook") 
+                        ? "Buy eBook" 
+                        : "Buy MP3/ZIP")}
                 </button>
               </div>
             </div>

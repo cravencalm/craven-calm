@@ -107,7 +107,7 @@ export default function EbooksPage() {
                       className="btn-buy book-btn"
                       style={{ border: "none", width: "100%", cursor: "pointer" }}
                     >
-                      Buy EPUB/PDF
+                      Buy eBook
                     </button>
                   </div>
                 </div>

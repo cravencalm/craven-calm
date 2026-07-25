@@ -259,8 +259,8 @@ export default function Home() {
           <div className="products-grid">
             {loading ? (
               <p style={{ gridColumn: "1 / -1", textAlign: "center", fontStyle: "italic", padding: "2rem" }}>Summoning melodies...</p>
-            ) : products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper"))).length > 0 ? (
-              products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper"))).slice(0, 4).map((product) => (
+            ) : products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper")) && !((p.category || "").split(",").includes("ebook"))).length > 0 ? (
+              products.filter(p => !p.is_physical && !((p.category || "").split(",").includes("mobile-wallpaper")) && !((p.category || "").split(",").includes("ebook"))).slice(0, 4).map((product) => (
                 <div className="product-card" key={product.id}>
                   <div className="product-image-wrapper">
                     <img src={product.image_url || "/assets/album_art_1_1775220324510.png"} alt={product.name} />
@@ -401,7 +401,7 @@ export default function Home() {
                         className="btn-buy book-btn"
                         style={{ border: "none", width: "100%", cursor: "pointer" }}
                       >
-                        Buy EPUB/PDF
+                        Buy eBook
                       </button>
                     </div>
                   </div>
