@@ -87,6 +87,7 @@ export default function Home() {
             id: p.id,
             title: p.name,
             author: p.audio_length || "Unknown",
+            description: p.youtube_id || "",
             image_url: p.image_url,
             price_cents: p.price_cents
           }));
@@ -249,6 +250,49 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Featured eBooks Section */}
+        {featuredEbooks.length > 0 && (
+          <>
+            <div className="section-divider" id="ebooks">
+              <span className="ornament left">&#10086;</span>
+              <h2>Featured eBooks</h2>
+              <span className="ornament right">&#10086;</span>
+            </div>
+
+            <section id="featured-ebooks" style={{ marginBottom: "4rem" }}>
+              <div className="products-grid">
+                {featuredEbooks.map((ebook) => (
+                  <div className="product-card book-card-home" key={ebook.id} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div className="product-image-wrapper" style={{ aspectRatio: '2/3', position: 'relative' }}>
+                      <img src={ebook.image_url || "/assets/album_art_1_1775220324510.png"} alt={ebook.title} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                      <span className="price-tag">${(ebook.price_cents / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="product-info" style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>{ebook.title}</h3>
+                        <p className="sub-text" style={{ fontStyle: 'italic', marginBottom: '0.8rem' }}>by {ebook.author}</p>
+                        <p style={{ fontSize: '0.82rem', opacity: 0.7, marginBottom: '1.5rem', lineHeight: '1.45', whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+                          {ebook.description || `Hidden Power (Part 1)\n\nIn a world of sorcery, living trees, and ancient magic, peace is the ultimate weapon. Born from a mysterious dragon egg, Sezzon is a silent, swordless samurai who walks a natural path of non-violence, patience, and profound wisdom. Unlike traditional warriors who rely on blades, Sezzon masters deep meditation, teleportation, element-shifting, and powerful spellcraft to neutralize threats without spilling blood.\n\nWhen Sezzon meets Deceased—a former violent swordsman turned leader of a secretive group known as Hidden Power—a profound transformation begins. Inspired by Sezzon’s teachings on emotional mastery and pacifism, Hidden Power discards their physical weapons to protect the land of Sezia through peaceful spellcraft, wisdom, and strategic non-lethal force.\n\nAs dangerous, power-hungry factions like Infinity, The Vultures, and the dark sorcerer Sarro of the Red Sword Gang threaten Sezia with chaotic bloodshed and dark rituals, Hidden Power embarks on a perilous mission. Guided by ancient magic, protective spirits, and the ghost of The Great Queen, Sezzon and his allies—joined by the secretive Dreamweavers and ancient protectors—must outsmart their enemies, destroy the forbidden Thirteen Keys, and uncover Sezzon's true hidden nature before Sezia falls to ruin.`}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => handleCheckout(ebook.id.toString())} 
+                        className="btn-buy book-btn"
+                        style={{ border: "none", width: "100%", cursor: "pointer", marginTop: "auto" }}
+                      >
+                        Buy eBook
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+                <a href="/ebooks" className="view-all-link">Visit Digital Library &rarr;</a>
+              </div>
+            </section>
+          </>
+        )}
+
         <div className="section-divider" id="music">
           <span className="ornament left">&#10086;</span>
           <h2>Latest Music Releases</h2>
@@ -376,43 +420,7 @@ export default function Home() {
           </>
         )}
 
-        {/* Featured eBooks Section */}
-        {featuredEbooks.length > 0 && (
-          <>
-            <div className="section-divider" id="ebooks">
-              <span className="ornament left">&#10086;</span>
-              <h2>Featured eBooks</h2>
-              <span className="ornament right">&#10086;</span>
-            </div>
-
-            <section id="featured-ebooks" style={{ marginBottom: "4rem" }}>
-              <div className="products-grid">
-                {featuredEbooks.map((ebook) => (
-                  <div className="product-card book-card-home" key={ebook.id}>
-                    <div className="product-image-wrapper" style={{ aspectRatio: '2/3', position: 'relative' }}>
-                      <img src={ebook.image_url || "/assets/album_art_1_1775220324510.png"} alt={ebook.title} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                      <span className="price-tag">${(ebook.price_cents / 100).toFixed(2)}</span>
-                    </div>
-                    <div className="product-info">
-                      <h3 style={{ fontSize: '1.1rem' }}>{ebook.title}</h3>
-                      <p className="sub-text" style={{ fontStyle: 'italic' }}>by {ebook.author}</p>
-                      <button 
-                        onClick={() => handleCheckout(ebook.id.toString())} 
-                        className="btn-buy book-btn"
-                        style={{ border: "none", width: "100%", cursor: "pointer" }}
-                      >
-                        Buy eBook
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-                <a href="/ebooks" className="view-all-link">Visit Digital Library &rarr;</a>
-              </div>
-            </section>
-          </>
-        )}
+        {/* Featured eBooks section moved to top of products list */}
 
         {/* Featured Visuals Section */}
         <div className="section-divider">

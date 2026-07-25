@@ -97,11 +97,9 @@ export default function EbooksPage() {
                   <div className="product-info">
                     <h3 style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>{ebook.title}</h3>
                     <p style={{ fontStyle: 'italic', fontSize: '0.9rem', color: 'var(--accent-color)', marginBottom: '0.8rem' }}>by {ebook.author}</p>
-                    {ebook.description && (
-                      <p style={{ fontSize: '0.88rem', opacity: 0.8, marginBottom: '1.5rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
-                        {ebook.description}
-                      </p>
-                    )}
+                    <p style={{ fontSize: '0.88rem', opacity: 0.8, marginBottom: '1.5rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                      {ebook.description || `Hidden Power (Part 1)\n\nIn a world of sorcery, living trees, and ancient magic, peace is the ultimate weapon. Born from a mysterious dragon egg, Sezzon is a silent, swordless samurai who walks a natural path of non-violence, patience, and profound wisdom. Unlike traditional warriors who rely on blades, Sezzon masters deep meditation, teleportation, element-shifting, and powerful spellcraft to neutralize threats without spilling blood.\n\nWhen Sezzon meets Deceased—a former violent swordsman turned leader of a secretive group known as Hidden Power—a profound transformation begins. Inspired by Sezzon’s teachings on emotional mastery and pacifism, Hidden Power discards their physical weapons to protect the land of Sezia through peaceful spellcraft, wisdom, and strategic non-lethal force.\n\nAs dangerous, power-hungry factions like Infinity, The Vultures, and the dark sorcerer Sarro of the Red Sword Gang threaten Sezia with chaotic bloodshed and dark rituals, Hidden Power embarks on a perilous mission. Guided by ancient magic, protective spirits, and the ghost of The Great Queen, Sezzon and his allies—joined by the secretive Dreamweavers and ancient protectors—must outsmart their enemies, destroy the forbidden Thirteen Keys, and uncover Sezzon's true hidden nature before Sezia falls to ruin.`}
+                    </p>
                     <button 
                       onClick={() => handleCheckout(ebook.id)} 
                       className="btn-buy book-btn"
