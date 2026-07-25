@@ -1148,22 +1148,25 @@ export default function AdminDashboard() {
           
           {ebookLoading ? <p>Loading library...</p> : ebooks.length > 0 ? (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {ebooks.map(e => (
-                <button 
-                  key={e.id} 
-                  onClick={() => handleSelectEbook(e)}
-                  style={{ 
-                    background: ebookEditingId === e.id ? "var(--accent-color)" : "transparent", 
-                    color: ebookEditingId === e.id ? "#000" : "var(--accent-color)", 
-                    border: `1px solid ${ebookEditingId === e.id ? "var(--accent-color)" : "#444"}`, 
-                    padding: "0.4rem 1rem", 
-                    cursor: "pointer",
-                    fontSize: "0.85rem"
-                  }}
-                >
-                  {e.title} {e.is_featured && "⭐"}
-                </button>
-              ))}
+              {ebooks.map(e => {
+                const isFeatured = (e.category || "").split(",").map((c: string) => c.trim()).includes("featured");
+                return (
+                  <button 
+                    key={e.id} 
+                    onClick={() => handleSelectEbook(e)}
+                    style={{ 
+                      background: ebookEditingId === e.id ? "var(--accent-color)" : "transparent", 
+                      color: ebookEditingId === e.id ? "#000" : "var(--accent-color)", 
+                      border: `1px solid ${ebookEditingId === e.id ? "var(--accent-color)" : "#444"}`, 
+                      padding: "0.4rem 1rem", 
+                      cursor: "pointer",
+                      fontSize: "0.85rem"
+                    }}
+                  >
+                    {e.name} {isFeatured && "⭐"}
+                  </button>
+                );
+              })}
             </div>
           ) : <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>No eBooks in the catalog yet.</p>}
         </div>

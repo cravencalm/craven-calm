@@ -98,7 +98,7 @@ export default function EbooksPage() {
                     <h3 style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>{ebook.title}</h3>
                     <p style={{ fontStyle: 'italic', fontSize: '0.9rem', color: 'var(--accent-color)', marginBottom: '0.8rem' }}>by {ebook.author}</p>
                     {ebook.description && (
-                      <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <p style={{ fontSize: '0.88rem', opacity: 0.8, marginBottom: '1.5rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
                         {ebook.description}
                       </p>
                     )}
