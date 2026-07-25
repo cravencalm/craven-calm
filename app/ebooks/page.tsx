@@ -81,10 +81,10 @@ export default function EbooksPage() {
           <div style={{ textAlign: 'center', padding: '4rem', fontStyle: 'italic', opacity: 0.6 }}>The digital shelves are currently quiet. Check back soon.</div>
         ) : (
           <div style={{ marginTop: "2rem" }}>
-            <div className="products-grid">
+            <div className="products-grid" style={ebooks.length === 1 ? { display: 'flex', justifyContent: 'center' } : {}}>
               {ebooks.map(ebook => (
-                <div key={ebook.id} className="product-card book-card">
-                  <div className="product-image-wrapper book-image-wrapper">
+                <div key={ebook.id} className="product-card book-card" style={ebooks.length === 1 ? { maxWidth: '500px', width: '100%', margin: '0 auto', textAlign: 'center' } : {}}>
+                  <div className="product-image-wrapper book-image-wrapper" style={{ margin: ebooks.length === 1 ? '0 auto' : undefined, maxWidth: ebooks.length === 1 ? '320px' : undefined, width: '100%' }}>
                     {ebook.image_url ? (
                       <img src={ebook.image_url} alt={ebook.title} />
                     ) : (
@@ -94,16 +94,16 @@ export default function EbooksPage() {
                     )}
                     <span className="price-tag">${(ebook.price_cents / 100).toFixed(2)}</span>
                   </div>
-                  <div className="product-info">
-                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>{ebook.title}</h3>
-                    <p style={{ fontStyle: 'italic', fontSize: '0.9rem', color: 'var(--accent-color)', marginBottom: '0.8rem' }}>by {ebook.author}</p>
-                    <p style={{ fontSize: '0.88rem', opacity: 0.8, marginBottom: '1.5rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                  <div className="product-info" style={{ textAlign: 'center' }}>
+                    <h3 style={{ fontSize: '1.4rem', marginBottom: '0.4rem' }}>{ebook.title}</h3>
+                    <p style={{ fontStyle: 'italic', fontSize: '0.95rem', color: 'var(--accent-color)', marginBottom: '1.2rem' }}>by {ebook.author}</p>
+                    <p style={{ fontSize: '0.88rem', opacity: 0.8, marginBottom: '1.8rem', lineHeight: '1.55', whiteSpace: 'pre-wrap', textAlign: 'center' }}>
                       {ebook.description || `Hidden Power (Part 1)\n\nIn a world of sorcery, living trees, and ancient magic, peace is the ultimate weapon. Born from a mysterious dragon egg, Sezzon is a silent, swordless samurai who walks a natural path of non-violence, patience, and profound wisdom. Unlike traditional warriors who rely on blades, Sezzon masters deep meditation, teleportation, element-shifting, and powerful spellcraft to neutralize threats without spilling blood.\n\nWhen Sezzon meets Deceased—a former violent swordsman turned leader of a secretive group known as Hidden Power—a profound transformation begins. Inspired by Sezzon’s teachings on emotional mastery and pacifism, Hidden Power discards their physical weapons to protect the land of Sezia through peaceful spellcraft, wisdom, and strategic non-lethal force.\n\nAs dangerous, power-hungry factions like Infinity, The Vultures, and the dark sorcerer Sarro of the Red Sword Gang threaten Sezia with chaotic bloodshed and dark rituals, Hidden Power embarks on a perilous mission. Guided by ancient magic, protective spirits, and the ghost of The Great Queen, Sezzon and his allies—joined by the secretive Dreamweavers and ancient protectors—must outsmart their enemies, destroy the forbidden Thirteen Keys, and uncover Sezzon's true hidden nature before Sezia falls to ruin.`}
                     </p>
                     <button 
                       onClick={() => handleCheckout(ebook.id)} 
                       className="btn-buy book-btn"
-                      style={{ border: "none", width: "100%", cursor: "pointer" }}
+                      style={{ border: "none", width: "100%", cursor: "pointer", maxWidth: "250px", margin: "0 auto" }}
                     >
                       Buy eBook
                     </button>
