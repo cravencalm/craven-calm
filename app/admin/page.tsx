@@ -44,6 +44,18 @@ type Book = {
   sort_order: number;
 };
 
+type Ebook = {
+  id: number;
+  title: string;
+  author: string;
+  description: string | null;
+  price_cents: number;
+  image_url: string | null;
+  file_url: string;
+  is_featured: boolean;
+  sort_order: number;
+};
+
 /** Extract the 11-char YouTube video ID from any common URL format */
 function extractYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
@@ -116,6 +128,19 @@ export default function AdminDashboard() {
   const [bookLoading, setBookLoading] = useState(false);
   const [bookEditingId, setBookEditingId] = useState<number | null>(null);
 
+  // eBooks state
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
+  const [ebookTitle, setEbookTitle] = useState("");
+  const [ebookAuthor, setEbookAuthor] = useState("");
+  const [ebookDescription, setEbookDescription] = useState("");
+  const [ebookPrice, setEbookPrice] = useState("");
+  const [ebookImageUrl, setEbookImageUrl] = useState("");
+  const [ebookFileUrl, setEbookFileUrl] = useState("");
+  const [isEbookFeatured, setIsEbookFeatured] = useState(false);
+  const [ebookStatus, setEbookStatus] = useState("");
+  const [ebookLoading, setEbookLoading] = useState(false);
+  const [ebookEditingId, setEbookEditingId] = useState<number | null>(null);
+
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
   const [authEmail, setAuthEmail] = useState("");
@@ -126,12 +151,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); }
-      else { setProducts([]); setVideos([]); setSubscribers([]); setBooks([]); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); }
+      else { setProducts([]); setVideos([]); setSubscribers([]); setBooks([]); setEbooks([]); }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -160,6 +185,110 @@ export default function AdminDashboard() {
     const { data } = await supabase.from("books").select("*").order("sort_order", { ascending: true });
     if (data) setBooks(data);
     setBookLoading(false);
+  };
+
+  const fetchEbooks = async () => {
+    setEbookLoading(true);
+    const { data } = await supabase.from("ebooks").select("*").order("sort_order", { ascending: true });
+    if (data) setEbooks(data);
+    setEbookLoading(false);
+  };
+
+  const handleSelectEbook = (ebook: Ebook | null) => {
+    setEbookStatus("");
+    if (ebook) {
+      setEbookEditingId(ebook.id);
+      setEbookTitle(ebook.title);
+      setEbookAuthor(ebook.author);
+      setEbookDescription(ebook.description || "");
+      setEbookPrice((ebook.price_cents / 100).toString());
+      setEbookImageUrl(ebook.image_url || "");
+      setEbookFileUrl(ebook.file_url || "");
+      setIsEbookFeatured(ebook.is_featured);
+    } else {
+      resetEbookForm();
+    }
+  };
+
+  const resetEbookForm = () => {
+    setEbookEditingId(null);
+    setEbookTitle("");
+    setEbookAuthor("");
+    setEbookDescription("");
+    setEbookPrice("");
+    setEbookImageUrl("");
+    setEbookFileUrl("");
+    setIsEbookFeatured(false);
+    setEbookStatus("");
+  };
+
+  const handleSaveEbook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEbookStatus("Saving eBook...");
+    const priceNum = Number(ebookPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setEbookStatus("❌ Invalid price. Please enter a positive number.");
+      return;
+    }
+    if (!ebookFileUrl) {
+      setEbookStatus("❌ eBook download file/link is required.");
+      return;
+    }
+    const payload = {
+      title: ebookTitle,
+      author: ebookAuthor,
+      description: ebookDescription || null,
+      price_cents: Math.round(priceNum * 100),
+      image_url: ebookImageUrl || null,
+      file_url: ebookFileUrl,
+      is_featured: isEbookFeatured,
+      sort_order: ebooks.length
+    };
+
+    if (ebookEditingId) {
+      const { error } = await supabase.from("ebooks").update(payload).eq("id", ebookEditingId);
+      if (error) setEbookStatus(`❌ Error: ${error.message}`);
+      else { setEbookStatus("✅ eBook updated!"); fetchEbooks(); resetEbookForm(); }
+    } else {
+      const { error } = await supabase.from("ebooks").insert([payload]);
+      if (error) setEbookStatus(`❌ Error: ${error.message}`);
+      else { setEbookStatus("✅ eBook added!"); fetchEbooks(); resetEbookForm(); }
+    }
+  };
+
+  const handleDeleteEbook = async (id: number, title: string) => {
+    if (!confirm(`Delete "${title}"?`)) return;
+    const { error } = await supabase.from("ebooks").delete().eq("id", id);
+    if (error) setEbookStatus(`❌ Error: ${error.message}`);
+    else { setEbookStatus(`✅ "${title}" removed.`); fetchEbooks(); handleSelectEbook(null); }
+  };
+
+  const handleEbookImageUrlUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEbookStatus("Uploading cover...");
+    const fileExt = file.name.split('.').pop();
+    const fileName = `ebook_cover_${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
+    const filePath = `ebooks/covers/${fileName}`;
+    const { error } = await supabase.storage.from("products_media").upload(filePath, file);
+    if (error) { setEbookStatus(`❌ Upload failed: ${error.message}`); return; }
+    const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
+    setEbookImageUrl(publicUrlData.publicUrl);
+    setEbookStatus(`✅ Cover uploaded: ${file.name}`);
+  };
+
+  const handleEbookFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEbookStatus("Uploading eBook file...");
+    const fileExt = file.name.split('.').pop();
+    const fileName = `ebook_file_${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
+    const filePath = `ebooks/files/${fileName}`;
+    const { error } = await supabase.storage.from("products_media").upload(filePath, file);
+    if (error) { setEbookStatus(`❌ Upload failed: ${error.message}`); return; }
+    const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
+    setEbookFileUrl(publicUrlData.publicUrl);
+    setEbookStatus(`✅ eBook file uploaded: ${file.name}`);
   };
 
   const handleSelectProduct = (product: Product | null) => {
@@ -887,6 +1016,9 @@ export default function AdminDashboard() {
       {/* ─── BOOKS ─── */}
       <div id="books-cms" style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem" }}>
         <h2 style={{ marginBottom: "0.5rem" }}>📚 Volumes of the Library</h2>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--accent-color)", opacity: 0.8, marginBottom: "0.5rem", fontSize: "0.95rem", fontStyle: "italic" }}>
+          Looking for digital downloads? Manage digital eBooks in the section directly below.
+        </p>
         <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
           Feature books from Bookshop.org. Books appear on the "Books" page and featured ones on the home page.
         </p>
@@ -976,6 +1108,103 @@ export default function AdminDashboard() {
               )}
             </div>
             {bookStatus && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", textAlign: "center" }}>{bookStatus}</p>}
+          </form>
+        </div>
+      </div>
+
+      {/* ─── EBOOKS ─── */}
+      <div id="ebooks-cms" style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem" }}>
+        <h2 style={{ marginBottom: "0.5rem" }}>📖 Digital eBooks</h2>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+          Manage digital eBooks (EPUB, PDF, ZIP) sold directly in the shop. Files are uploaded directly to Supabase storage.
+        </p>
+
+        <div style={{ background: "#0a0a0c", padding: "1.5rem", border: "1px solid #333", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+            <h3 style={{ margin: 0 }}>Current eBook Catalog</h3>
+            <button onClick={() => handleSelectEbook(null)} style={{ background: ebookEditingId === null ? "var(--accent-color)" : "#222", color: ebookEditingId === null ? "#000" : "#fff", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}>+ ADD NEW EBOOK</button>
+          </div>
+          
+          {ebookLoading ? <p>Loading library...</p> : ebooks.length > 0 ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {ebooks.map(e => (
+                <button 
+                  key={e.id} 
+                  onClick={() => handleSelectEbook(e)}
+                  style={{ 
+                    background: ebookEditingId === e.id ? "var(--accent-color)" : "transparent", 
+                    color: ebookEditingId === e.id ? "#000" : "var(--accent-color)", 
+                    border: `1px solid ${ebookEditingId === e.id ? "var(--accent-color)" : "#444"}`, 
+                    padding: "0.4rem 1rem", 
+                    cursor: "pointer",
+                    fontSize: "0.85rem"
+                  }}
+                >
+                  {e.title} {e.is_featured && "⭐"}
+                </button>
+              ))}
+            </div>
+          ) : <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>No eBooks in the catalog yet.</p>}
+        </div>
+
+        <div style={{ background: "var(--card-bg)", padding: "2rem", border: "1px solid var(--border-color)" }}>
+          <h3 style={{ marginBottom: "1.5rem", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>{ebookEditingId ? `Edit: ${ebookTitle}` : "Feature a New eBook"}</h3>
+          <form onSubmit={handleSaveEbook} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Title</label>
+                <input required value={ebookTitle} onChange={e => setEbookTitle(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Author</label>
+                <input required value={ebookAuthor} onChange={e => setEbookAuthor(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
+              </div>
+            </div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div>
+                <label style={{ display: "block", marginBottom: "0.5rem" }}>Price (USD)</label>
+                <input required type="number" step="0.01" value={ebookPrice} onChange={e => setEbookPrice(e.target.value)} style={{ ...inputStyle, width: "100%" }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", paddingTop: "1.8rem" }}>
+                <input type="checkbox" id="isEbookFeatured" checked={isEbookFeatured} onChange={e => setIsEbookFeatured(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+                <label htmlFor="isEbookFeatured" style={{ cursor: "pointer", fontWeight: "bold", color: isEbookFeatured ? "var(--accent-color)" : "inherit" }}>Feature on Homepage</label>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Description (Optional)</label>
+              <textarea value={ebookDescription} onChange={e => setEbookDescription(e.target.value)} rows={3} style={{ ...inputStyle, width: "100%", fontFamily: "var(--font-body)", resize: "vertical" }} />
+            </div>
+
+            <div style={{ padding: "1rem", background: "#0a0a0c", border: "1px dashed #333" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Upload Book Cover {ebookImageUrl && "— File Active"}</label>
+              <input type="file" accept="image/*" onChange={handleEbookImageUrlUpload} style={{ color: "var(--accent-color)", width: "100%" }} />
+              {ebookImageUrl && <img src={ebookImageUrl} alt="Preview" style={{ height: "100px", marginTop: "1rem", border: "1px solid #333" }} />}
+            </div>
+
+            <div style={{ padding: "1rem", background: "#0a0a0c", border: "1px dashed #333" }}>
+              <label style={{ display: "block", marginBottom: "0.5rem" }}>Upload eBook File (EPUB, PDF, ZIP) {ebookFileUrl && "— File Active"}</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <input type="url" placeholder="Or paste external download link here..." value={ebookFileUrl} onChange={e => setEbookFileUrl(e.target.value)} style={inputStyle} />
+                <div style={{ borderTop: "1px solid #333", paddingTop: "1rem" }}>
+                  <p style={{ margin: "0 0 0.5rem 0", fontSize: "0.8rem", color: "var(--accent-color)" }}>Or Upload File to Supabase:</p>
+                  <input type="file" accept=".epub,.pdf,.zip" onChange={handleEbookFileUpload} style={{ color: "var(--accent-color)", width: "100%" }} />
+                </div>
+              </div>
+              {ebookFileUrl && <p style={{ color: "#4caf50", fontSize: "0.8rem", marginTop: "0.5rem", wordBreak: "break-all" }}>{ebookEditingId ? "File is set. Upload new file or paste link to overwrite." : "File ready!"} <br/><span style={{opacity: 0.7}}>{ebookFileUrl}</span></p>}
+            </div>
+
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button type="submit" className="btn-action" style={{ flex: 1 }}>{ebookEditingId ? "Update eBook" : "Add to Library"}</button>
+              {ebookEditingId && (
+                <>
+                  <button type="button" onClick={() => handleSelectEbook(null)} style={{ background: "transparent", border: "1px solid #444", color: "#888", padding: "0 1.5rem" }}>Cancel</button>
+                  <button type="button" onClick={() => handleDeleteEbook(ebookEditingId, ebookTitle)} style={{ background: "transparent", border: "1px solid #f44336", color: "#f44336", padding: "0 1.5rem" }}>Delete</button>
+                </>
+              )}
+            </div>
+            {ebookStatus && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", textAlign: "center" }}>{ebookStatus}</p>}
           </form>
         </div>
       </div>

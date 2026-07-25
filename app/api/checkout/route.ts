@@ -15,13 +15,52 @@ export async function POST(request: Request) {
     }
 
     // Lookup product in Supabase
-    const { data: product, error } = await supabase
+    let product: {
+      name: string;
+      price_cents: number;
+      image_url?: string | null;
+      is_physical: boolean;
+      is_ebook?: boolean;
+      description?: string;
+    } | null = null;
+
+    const { data: productData } = await supabase
       .from("products")
       .select("*")
       .eq("id", productId)
-      .single();
+      .maybeSingle();
 
-    if (error || !product) {
+    if (productData) {
+      product = {
+        name: productData.name,
+        price_cents: productData.price_cents,
+        image_url: productData.image_url,
+        is_physical: !!productData.is_physical,
+        description: productData.is_physical 
+          ? "Physical Metal-Framed Poster (Global Shipping)" 
+          : "Craven Calm High-Quality Digital Download (MP3/ZIP)",
+      };
+    } else {
+      // Try looking up in ebooks table
+      const { data: ebookData } = await supabase
+        .from("ebooks")
+        .select("*")
+        .eq("id", productId)
+        .maybeSingle();
+      
+      if (ebookData) {
+        product = {
+          name: ebookData.title,
+          price_cents: ebookData.price_cents,
+          image_url: ebookData.image_url,
+          is_physical: false,
+          is_ebook: true,
+          description: `eBook by ${ebookData.author} - Digital EPUB/PDF Download`,
+        };
+      }
+    }
+
+    if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
@@ -43,9 +82,7 @@ export async function POST(request: Request) {
             product_data: {
               name: product.name,
               images: product.image_url ? [product.image_url] : [],
-              description: product.is_physical 
-                ? "Physical Metal-Framed Poster (Global Shipping)" 
-                : "Craven Calm High-Quality Digital Download (MP3/ZIP)",
+              description: product.description,
             },
             unit_amount: typeof product.price_cents === "number" ? product.price_cents : 900,
           },
@@ -77,6 +114,7 @@ export async function POST(request: Request) {
       metadata: {
         productId: productId.toString(),
         isPhysical: product.is_physical ? "true" : "false",
+        isEbook: product.is_ebook ? "true" : "false",
       },
     });
 

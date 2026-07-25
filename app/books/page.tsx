@@ -41,6 +41,9 @@ export default function BooksPage() {
       <div className="music-page-header" style={{ background: 'linear-gradient(to bottom, rgba(7, 7, 10, 0.98) 0%, rgba(7, 7, 10, 0.8) 100%)' }}>
         <h1 className="music-page-title">The Curated Library</h1>
         <p className="music-page-subtitle">Hand-picked volumes for the dark academia soul — supported by Bookshop.org</p>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--accent-color)", fontStyle: "italic", marginTop: "1rem", fontSize: "1rem" }}>
+          Digital eBooks collection coming soon to the Sanctuary!
+        </p>
       </div>
 
       <main style={{ paddingBottom: "6rem", minHeight: "60vh" }}>

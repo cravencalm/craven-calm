@@ -28,14 +28,31 @@ function CheckoutSuccessContent() {
         return;
       }
 
-      const { data, error } = await supabase
+      // Try products table first
+      const { data: productData } = await supabase
         .from("products")
         .select("name, mp3_preview_url, zip_file_url, is_physical")
         .eq("id", productId)
-        .single();
+        .maybeSingle();
 
-      if (data) {
-        setProduct(data);
+      if (productData) {
+        setProduct(productData);
+      } else {
+        // Try ebooks table
+        const { data: ebookData } = await supabase
+          .from("ebooks")
+          .select("title, file_url")
+          .eq("id", productId)
+          .maybeSingle();
+        
+        if (ebookData) {
+          setProduct({
+            name: ebookData.title,
+            mp3_preview_url: "",
+            zip_file_url: ebookData.file_url,
+            is_physical: false,
+          });
+        }
       }
       setLoading(false);
     }
