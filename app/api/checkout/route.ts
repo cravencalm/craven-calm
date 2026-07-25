@@ -31,33 +31,19 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (productData) {
+      const isEbook = (productData.category || "").split(",").includes("ebook");
       product = {
         name: productData.name,
         price_cents: productData.price_cents,
         image_url: productData.image_url,
         is_physical: !!productData.is_physical,
-        description: productData.is_physical 
-          ? "Physical Metal-Framed Poster (Global Shipping)" 
-          : "Craven Calm High-Quality Digital Download (MP3/ZIP)",
+        is_ebook: isEbook,
+        description: isEbook
+          ? `eBook by ${productData.audio_length || "Unknown"} - Digital EPUB/PDF Download`
+          : (productData.is_physical 
+              ? "Physical Metal-Framed Poster (Global Shipping)" 
+              : "Craven Calm High-Quality Digital Download (MP3/ZIP)"),
       };
-    } else {
-      // Try looking up in ebooks table
-      const { data: ebookData } = await supabase
-        .from("ebooks")
-        .select("*")
-        .eq("id", productId)
-        .maybeSingle();
-      
-      if (ebookData) {
-        product = {
-          name: ebookData.title,
-          price_cents: ebookData.price_cents,
-          image_url: ebookData.image_url,
-          is_physical: false,
-          is_ebook: true,
-          description: `eBook by ${ebookData.author} - Digital EPUB/PDF Download`,
-        };
-      }
     }
 
     if (!product) {

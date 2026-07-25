@@ -23,10 +23,24 @@ export default function EbooksPage() {
   useEffect(() => {
     async function fetchEbooks() {
       const { data } = await supabase
-        .from("ebooks")
+        .from("products")
         .select("*")
-        .order("sort_order", { ascending: true });
-      if (data) setEbooks(data);
+        .like("category", "%ebook%")
+        .order("id", { ascending: false });
+      
+      if (data) {
+        const mapped = data.map((p: any) => ({
+          id: p.id,
+          title: p.name,
+          author: p.audio_length || "Unknown",
+          description: p.youtube_id || "",
+          price_cents: p.price_cents,
+          image_url: p.image_url,
+          file_url: p.zip_file_url || "",
+          is_featured: (p.category || "").split(",").includes("featured")
+        }));
+        setEbooks(mapped);
+      }
       setLoading(false);
     }
     fetchEbooks();

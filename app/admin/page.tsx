@@ -129,7 +129,7 @@ export default function AdminDashboard() {
   const [bookEditingId, setBookEditingId] = useState<number | null>(null);
 
   // eBooks state
-  const [ebooks, setEbooks] = useState<Ebook[]>([]);
+  const [ebooks, setEbooks] = useState<any[]>([]);
   const [ebookTitle, setEbookTitle] = useState("");
   const [ebookAuthor, setEbookAuthor] = useState("");
   const [ebookDescription, setEbookDescription] = useState("");
@@ -164,7 +164,11 @@ export default function AdminDashboard() {
   const fetchProducts = async () => {
     setLoading(true);
     const { data } = await supabase.from("products").select("*").order("id", { ascending: false });
-    if (data) setProducts(data);
+    if (data) {
+      // Filter out ebooks from products list
+      const filtered = data.filter(p => !(p.category || "").split(",").includes("ebook"));
+      setProducts(filtered);
+    }
     setLoading(false);
   };
 
@@ -189,22 +193,26 @@ export default function AdminDashboard() {
 
   const fetchEbooks = async () => {
     setEbookLoading(true);
-    const { data } = await supabase.from("ebooks").select("*").order("sort_order", { ascending: true });
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .like("category", "%ebook%")
+      .order("id", { ascending: false });
     if (data) setEbooks(data);
     setEbookLoading(false);
   };
 
-  const handleSelectEbook = (ebook: Ebook | null) => {
+  const handleSelectEbook = (ebook: any | null) => {
     setEbookStatus("");
     if (ebook) {
       setEbookEditingId(ebook.id);
-      setEbookTitle(ebook.title);
-      setEbookAuthor(ebook.author);
-      setEbookDescription(ebook.description || "");
+      setEbookTitle(ebook.name);
+      setEbookAuthor(ebook.audio_length || "");
+      setEbookDescription(ebook.youtube_id || "");
       setEbookPrice((ebook.price_cents / 100).toString());
       setEbookImageUrl(ebook.image_url || "");
-      setEbookFileUrl(ebook.file_url || "");
-      setIsEbookFeatured(ebook.is_featured);
+      setEbookFileUrl(ebook.zip_file_url || "");
+      setIsEbookFeatured(ebook.category ? ebook.category.split(',').includes("featured") : false);
     } else {
       resetEbookForm();
     }
@@ -234,23 +242,29 @@ export default function AdminDashboard() {
       setEbookStatus("❌ eBook download file/link is required.");
       return;
     }
+    
+    const categoriesList = ["ebook"];
+    if (isEbookFeatured) categoriesList.push("featured");
+    
     const payload = {
-      title: ebookTitle,
-      author: ebookAuthor,
-      description: ebookDescription || null,
+      name: ebookTitle,
       price_cents: Math.round(priceNum * 100),
       image_url: ebookImageUrl || null,
-      file_url: ebookFileUrl,
-      is_featured: isEbookFeatured,
-      sort_order: ebooks.length
+      zip_file_url: ebookFileUrl,
+      audio_length: ebookAuthor || null, // Store author in audio_length
+      youtube_id: ebookDescription || null, // Store description in youtube_id
+      is_physical: false,
+      category: categoriesList.join(","),
+      tracks: null,
+      mp3_preview_url: null
     };
 
     if (ebookEditingId) {
-      const { error } = await supabase.from("ebooks").update(payload).eq("id", ebookEditingId);
+      const { error } = await supabase.from("products").update(payload).eq("id", ebookEditingId);
       if (error) setEbookStatus(`❌ Error: ${error.message}`);
       else { setEbookStatus("✅ eBook updated!"); fetchEbooks(); resetEbookForm(); }
     } else {
-      const { error } = await supabase.from("ebooks").insert([payload]);
+      const { error } = await supabase.from("products").insert([payload]);
       if (error) setEbookStatus(`❌ Error: ${error.message}`);
       else { setEbookStatus("✅ eBook added!"); fetchEbooks(); resetEbookForm(); }
     }
@@ -258,7 +272,7 @@ export default function AdminDashboard() {
 
   const handleDeleteEbook = async (id: number, title: string) => {
     if (!confirm(`Delete "${title}"?`)) return;
-    const { error } = await supabase.from("ebooks").delete().eq("id", id);
+    const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) setEbookStatus(`❌ Error: ${error.message}`);
     else { setEbookStatus(`✅ "${title}" removed.`); fetchEbooks(); handleSelectEbook(null); }
   };

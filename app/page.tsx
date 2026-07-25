@@ -76,12 +76,22 @@ export default function Home() {
     async function fetchFeaturedEbooks() {
       try {
         const { data, error } = await supabase
-          .from("ebooks")
+          .from("products")
           .select("*")
-          .eq("is_featured", true)
+          .like("category", "%ebook%")
+          .like("category", "%featured%")
           .order("id", { ascending: false })
           .limit(4);
-        if (data && !error) setFeaturedEbooks(data);
+        if (data && !error) {
+          const mapped = data.map((p: any) => ({
+            id: p.id,
+            title: p.name,
+            author: p.audio_length || "Unknown",
+            image_url: p.image_url,
+            price_cents: p.price_cents
+          }));
+          setFeaturedEbooks(mapped);
+        }
       } catch (_) {}
     }
     fetchProducts();
