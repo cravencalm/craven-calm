@@ -191,6 +191,16 @@ export default function AdminDashboard() {
     setBookLoading(false);
   };
 
+  const handleDatabaseError = (error: any, setStatusFn: (msg: string) => void) => {
+    console.error("Database Error:", error);
+    const msg = error.message || "";
+    if (msg.includes("JWT") || msg.toLowerCase().includes("expired") || msg.includes("token")) {
+      setStatusFn("❌ Session expired. Please Sign Out and Sign In again to refresh your login.");
+    } else {
+      setStatusFn(`❌ Error: ${msg}`);
+    }
+  };
+
   const fetchEbooks = async () => {
     setEbookLoading(true);
     const { data } = await supabase
@@ -261,11 +271,11 @@ export default function AdminDashboard() {
 
     if (ebookEditingId) {
       const { error } = await supabase.from("products").update(payload).eq("id", ebookEditingId);
-      if (error) setEbookStatus(`❌ Error: ${error.message}`);
+      if (error) handleDatabaseError(error, setEbookStatus);
       else { setEbookStatus("✅ eBook updated!"); fetchEbooks(); resetEbookForm(); }
     } else {
       const { error } = await supabase.from("products").insert([payload]);
-      if (error) setEbookStatus(`❌ Error: ${error.message}`);
+      if (error) handleDatabaseError(error, setEbookStatus);
       else { setEbookStatus("✅ eBook added!"); fetchEbooks(); resetEbookForm(); }
     }
   };
@@ -273,7 +283,7 @@ export default function AdminDashboard() {
   const handleDeleteEbook = async (id: number, title: string) => {
     if (!confirm(`Delete "${title}"?`)) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) setEbookStatus(`❌ Error: ${error.message}`);
+    if (error) handleDatabaseError(error, setEbookStatus);
     else { setEbookStatus(`✅ "${title}" removed.`); fetchEbooks(); handleSelectEbook(null); }
   };
 
@@ -285,7 +295,7 @@ export default function AdminDashboard() {
     const fileName = `ebook_cover_${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
     const filePath = `ebooks/covers/${fileName}`;
     const { error } = await supabase.storage.from("products_media").upload(filePath, file);
-    if (error) { setEbookStatus(`❌ Upload failed: ${error.message}`); return; }
+    if (error) { handleDatabaseError(error, setEbookStatus); return; }
     const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
     setEbookImageUrl(publicUrlData.publicUrl);
     setEbookStatus(`✅ Cover uploaded: ${file.name}`);
@@ -299,7 +309,7 @@ export default function AdminDashboard() {
     const fileName = `ebook_file_${Math.random().toString(36).substring(2, 11)}_${Date.now()}.${fileExt}`;
     const filePath = `ebooks/files/${fileName}`;
     const { error } = await supabase.storage.from("products_media").upload(filePath, file);
-    if (error) { setEbookStatus(`❌ Upload failed: ${error.message}`); return; }
+    if (error) { handleDatabaseError(error, setEbookStatus); return; }
     const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
     setEbookFileUrl(publicUrlData.publicUrl);
     setEbookStatus(`✅ eBook file uploaded: ${file.name}`);
@@ -344,7 +354,7 @@ export default function AdminDashboard() {
     const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
     const filePath = `products/${fileName}`;
     const { error } = await supabase.storage.from("products_media").upload(filePath, file);
-    if (error) { setStatus(`Upload failed: ${error.message}`); return; }
+    if (error) { handleDatabaseError(error, setStatus); return; }
     const { data: publicUrlData } = supabase.storage.from("products_media").getPublicUrl(filePath);
     const uploadedUrl = publicUrlData.publicUrl;
     if (fileType === "mp3") setMp3Url(uploadedUrl);
@@ -538,8 +548,7 @@ export default function AdminDashboard() {
     if (editingId) {
       const { error } = await supabase.from('products').update(payload).eq("id", editingId);
       if (error) {
-        console.error("Supabase Save Error:", error);
-        setStatus(`❌ Database error: ${error.message}${error.hint ? ` (${error.hint})` : ""}`);
+        handleDatabaseError(error, setStatus);
       } else { 
         setStatus(`✅ Product "${productName}" updated successfully!`); 
         fetchProducts(); 
@@ -548,8 +557,7 @@ export default function AdminDashboard() {
     } else {
       const { error } = await supabase.from('products').insert([payload]);
       if (error) {
-        console.error("Supabase Save Error:", error);
-        setStatus(`❌ Database error: ${error.message}${error.hint ? ` (${error.hint})` : ""}`);
+        handleDatabaseError(error, setStatus);
       } else { 
         setStatus(`✅ Product "${productName}" created successfully!`); 
         fetchProducts(); 
@@ -563,8 +571,7 @@ export default function AdminDashboard() {
     setStatus(`Deleting "${name}"...`);
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) {
-      console.error("Supabase Delete Error:", error);
-      setStatus(`❌ Failed to delete: ${error.message}`);
+      handleDatabaseError(error, setStatus);
     } else {
       setStatus(`✅ "${name}" has been removed from the sanctuary.`);
       fetchProducts();
