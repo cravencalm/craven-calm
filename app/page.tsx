@@ -48,6 +48,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>([]);
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
+  const [featuredEbooks, setFeaturedEbooks] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -72,9 +73,21 @@ export default function Home() {
         if (data && !error) setFeaturedBooks(data);
       } catch (_) {}
     }
+    async function fetchFeaturedEbooks() {
+      try {
+        const { data, error } = await supabase
+          .from("ebooks")
+          .select("*")
+          .eq("is_featured", true)
+          .order("id", { ascending: false })
+          .limit(4);
+        if (data && !error) setFeaturedEbooks(data);
+      } catch (_) {}
+    }
     fetchProducts();
     fetchVideos();
     fetchFeaturedBooks();
+    fetchFeaturedEbooks();
   }, []);
 
   const handleCheckout = async (productId: string) => {
@@ -348,6 +361,44 @@ export default function Home() {
               </p>
               <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
                 <a href="/books" className="view-all-link">Visit The Library &rarr;</a>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Featured eBooks Section */}
+        {featuredEbooks.length > 0 && (
+          <>
+            <div className="section-divider" id="ebooks">
+              <span className="ornament left">&#10086;</span>
+              <h2>Featured eBooks</h2>
+              <span className="ornament right">&#10086;</span>
+            </div>
+
+            <section id="featured-ebooks" style={{ marginBottom: "4rem" }}>
+              <div className="products-grid">
+                {featuredEbooks.map((ebook) => (
+                  <div className="product-card book-card-home" key={ebook.id}>
+                    <div className="product-image-wrapper" style={{ aspectRatio: '2/3', position: 'relative' }}>
+                      <img src={ebook.image_url || "/assets/album_art_1_1775220324510.png"} alt={ebook.title} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                      <span className="price-tag">${(ebook.price_cents / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="product-info">
+                      <h3 style={{ fontSize: '1.1rem' }}>{ebook.title}</h3>
+                      <p className="sub-text" style={{ fontStyle: 'italic' }}>by {ebook.author}</p>
+                      <button 
+                        onClick={() => handleCheckout(ebook.id.toString())} 
+                        className="btn-buy book-btn"
+                        style={{ border: "none", width: "100%", cursor: "pointer" }}
+                      >
+                        Buy EPUB/PDF
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+                <a href="/ebooks" className="view-all-link">Visit Digital Library &rarr;</a>
               </div>
             </section>
           </>

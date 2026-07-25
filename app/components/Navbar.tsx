@@ -86,6 +86,9 @@ export default function Navbar() {
             Books <span className="nav-arrow">▼</span>
           </Link>
           <div className="nav-dropdown">
+            <Link href="/ebooks" onClick={closeMenu} style={{ color: "var(--accent-color)", fontWeight: "bold" }}>
+              Digital eBooks 📖
+            </Link>
             <Link href="/books/horror" onClick={closeMenu}>
               Horror
             </Link>
