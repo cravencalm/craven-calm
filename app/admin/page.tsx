@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { supabase } from "@/lib/supabase";
 import JSZip from "jszip";
 import type { Session } from "@supabase/supabase-js";
@@ -29,6 +29,20 @@ type FeaturedVideo = {
 type Subscriber = {
   id: number;
   email: string;
+  created_at: string;
+};
+
+type Purchase = {
+  id: string;
+  stripe_session_id: string;
+  customer_email: string;
+  customer_name: string | null;
+  product_id: number | null;
+  product_name: string;
+  amount_total: number;
+  currency: string;
+  is_physical: boolean;
+  shipping_address: any | null;
   created_at: string;
 };
 
@@ -141,6 +155,13 @@ export default function AdminDashboard() {
   const [ebookLoading, setEbookLoading] = useState(false);
   const [ebookEditingId, setEbookEditingId] = useState<number | null>(null);
 
+  // Purchases state
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+  const [purchaseSearch, setPurchaseSearch] = useState("");
+  const [purchaseFilter, setPurchaseFilter] = useState<"all" | "physical" | "digital">("all");
+  const [expandedPurchaseId, setExpandedPurchaseId] = useState<string | null>(null);
+
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
   const [authEmail, setAuthEmail] = useState("");
@@ -151,15 +172,22 @@ export default function AdminDashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); fetchPurchases(); }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); }
-      else { setProducts([]); setVideos([]); setSubscribers([]); setBooks([]); setEbooks([]); }
+      if (session) { fetchProducts(); fetchVideos(); fetchSubscribers(); fetchBooks(); fetchEbooks(); fetchPurchases(); }
+      else { setProducts([]); setVideos([]); setSubscribers([]); setBooks([]); setEbooks([]); setPurchases([]); }
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchPurchases = async () => {
+    setPurchasesLoading(true);
+    const { data } = await supabase.from("purchases").select("*").order("created_at", { ascending: false });
+    if (data) setPurchases(data);
+    setPurchasesLoading(false);
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -693,6 +721,20 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => { await supabase.auth.signOut(); };
   const previewId = videoUrl ? extractYouTubeId(videoUrl) : null;
+
+  const filteredPurchases = purchases.filter(p => {
+    const matchesSearch = 
+      p.product_name.toLowerCase().includes(purchaseSearch.toLowerCase()) ||
+      p.customer_email.toLowerCase().includes(purchaseSearch.toLowerCase()) ||
+      (p.customer_name && p.customer_name.toLowerCase().includes(purchaseSearch.toLowerCase()));
+    
+    const matchesFilter = 
+      purchaseFilter === "all" ||
+      (purchaseFilter === "physical" && p.is_physical) ||
+      (purchaseFilter === "digital" && !p.is_physical);
+      
+    return matchesSearch && matchesFilter;
+  });
 
   const inputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem", background: "#111", color: "#fff", border: "1px solid var(--border-color)" };
 
@@ -1231,6 +1273,176 @@ export default function AdminDashboard() {
             {ebookStatus && <p style={{ color: "var(--accent-hover)", fontStyle: "italic", textAlign: "center" }}>{ebookStatus}</p>}
           </form>
         </div>
+      </div>
+
+      {/* ─── PURCHASE HISTORY ─── */}
+      <div style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem" }}>
+        <h2 style={{ marginBottom: "0.5rem" }}>🛍️ Purchase History</h2>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
+          Track sales and transactions made on the storefront.
+        </p>
+
+        {/* STATS OVERVIEW */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", padding: "1.5rem", borderRadius: "4px" }}>
+            <p style={{ margin: 0, fontSize: "0.75rem", textTransform: "uppercase", color: "#888", letterSpacing: "0.1em" }}>Total Revenue</p>
+            <p style={{ margin: "0.5rem 0 0 0", fontSize: "2rem", color: "var(--accent-color)", fontFamily: "var(--font-heading)", fontWeight: "bold" }}>
+              ${(purchases.reduce((acc, p) => acc + p.amount_total, 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", padding: "1.5rem", borderRadius: "4px" }}>
+            <p style={{ margin: 0, fontSize: "0.75rem", textTransform: "uppercase", color: "#888", letterSpacing: "0.1em" }}>Total Orders</p>
+            <p style={{ margin: "0.5rem 0 0 0", fontSize: "2rem", color: "#fff", fontFamily: "var(--font-heading)", fontWeight: "bold" }}>
+              {purchases.length}
+            </p>
+          </div>
+          <div style={{ background: "var(--card-bg)", border: "1px solid var(--border-color)", padding: "1.5rem", borderRadius: "4px" }}>
+            <p style={{ margin: 0, fontSize: "0.75rem", textTransform: "uppercase", color: "#888", letterSpacing: "0.1em" }}>Product Distribution</p>
+            <p style={{ margin: "0.5rem 0 0 0", fontSize: "1.2rem", color: "#d1ccb8", fontFamily: "var(--font-heading)" }}>
+              {purchases.filter(p => !p.is_physical).length} Digital<br/>
+              {purchases.filter(p => p.is_physical).length} Physical
+            </p>
+          </div>
+        </div>
+
+        {/* SEARCH AND FILTERS */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem", alignItems: "center" }}>
+          <input 
+            type="text" 
+            placeholder="Search by customer name, email, or product..." 
+            value={purchaseSearch} 
+            onChange={e => setPurchaseSearch(e.target.value)} 
+            style={{ ...inputStyle, flex: 1, minWidth: "250px", padding: "0.6rem" }} 
+          />
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {(["all", "physical", "digital"] as const).map(type => (
+              <button 
+                key={type}
+                type="button"
+                onClick={() => setPurchaseFilter(type)}
+                style={{
+                  background: purchaseFilter === type ? "var(--accent-color)" : "transparent",
+                  color: purchaseFilter === type ? "#000" : "var(--accent-color)",
+                  border: `1px solid ${purchaseFilter === type ? "var(--accent-color)" : "#444"}`,
+                  padding: "0.4rem 1rem",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  textTransform: "capitalize"
+                }}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* TRANSACTIONS TABLE */}
+        {purchasesLoading ? (
+          <p style={{ fontStyle: "italic", fontSize: "0.9rem" }}>Loading purchases...</p>
+        ) : purchases.length > 0 ? (
+          filteredPurchases.length > 0 ? (
+            <div style={{ background: "#0a0a0c", border: "1px solid #333" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-body)", fontSize: "0.9rem" }}>
+                <thead style={{ background: "#111", borderBottom: "1px solid #333" }}>
+                  <tr>
+                    <th style={{ textAlign: "left", padding: "1rem" }}>Date</th>
+                    <th style={{ textAlign: "left", padding: "1rem" }}>Customer</th>
+                    <th style={{ textAlign: "left", padding: "1rem" }}>Product</th>
+                    <th style={{ textAlign: "right", padding: "1rem" }}>Amount</th>
+                    <th style={{ textAlign: "center", padding: "1rem" }}>Fulfillment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPurchases.map(p => (
+                    <Fragment key={p.id}>
+                      <tr style={{ borderBottom: "1px solid #222" }}>
+                        <td style={{ padding: "0.8rem 1rem", opacity: 0.8 }}>
+                          {new Date(p.created_at).toLocaleDateString()}<br/>
+                          <span style={{ fontSize: "0.75rem", opacity: 0.5 }}>{new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </td>
+                        <td style={{ padding: "0.8rem 1rem" }}>
+                          <span style={{ fontWeight: "bold", color: "#fff" }}>{p.customer_name || "Guest"}</span><br/>
+                          <span style={{ fontSize: "0.8rem", color: "var(--accent-color)" }}>{p.customer_email}</span>
+                        </td>
+                        <td style={{ padding: "0.8rem 1rem", color: "#d1ccb8" }}>{p.product_name}</td>
+                        <td style={{ padding: "0.8rem 1rem", textAlign: "right", color: "var(--accent-color)", fontWeight: "bold" }}>
+                          ${(p.amount_total / 100).toFixed(2)}
+                        </td>
+                        <td style={{ padding: "0.8rem 1rem", textAlign: "center" }}>
+                          {p.is_physical ? (
+                            <button 
+                              type="button"
+                              onClick={() => setExpandedPurchaseId(expandedPurchaseId === p.id ? null : p.id)}
+                              style={{ 
+                                background: "rgba(227,169,104,0.1)", 
+                                color: "var(--accent-color)", 
+                                border: "1px solid var(--accent-color)", 
+                                padding: "0.3rem 0.6rem", 
+                                cursor: "pointer", 
+                                fontSize: "0.75rem",
+                                borderRadius: "3px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.4rem"
+                              }}
+                            >
+                              📦 Physical {expandedPurchaseId === p.id ? "▲" : "▼"}
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: "0.8rem", color: "#888", background: "#111", padding: "0.2rem 0.5rem", borderRadius: "3px", border: "1px solid #222" }}>
+                              💻 Digital
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                      {expandedPurchaseId === p.id && p.is_physical && p.shipping_address && (
+                        <tr>
+                          <td colSpan={5} style={{ background: "#050507", padding: "1.5rem", borderBottom: "1px solid #333" }}>
+                            <div style={{ maxWidth: "500px" }}>
+                              <h4 style={{ margin: "0 0 1rem 0", color: "var(--accent-color)", borderBottom: "1px solid #222", paddingBottom: "0.5rem" }}>📦 Shipping Details</h4>
+                              <p style={{ margin: "0.3rem 0" }}><strong>Recipient:</strong> {p.shipping_address.name || p.customer_name}</p>
+                              <p style={{ margin: "0.3rem 0" }}><strong>Street:</strong> {p.shipping_address.address?.line1} {p.shipping_address.address?.line2 ? `, ${p.shipping_address.address.line2}` : ""}</p>
+                              <p style={{ margin: "0.3rem 0" }}><strong>City/State/Zip:</strong> {p.shipping_address.address?.city}, {p.shipping_address.address?.state} {p.shipping_address.address?.postal_code}</p>
+                              <p style={{ margin: "0.3rem 0" }}><strong>Country:</strong> {p.shipping_address.address?.country}</p>
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  const addr = `${p.shipping_address.name}\n${p.shipping_address.address?.line1}${p.shipping_address.address?.line2 ? ', ' + p.shipping_address.address.line2 : ''}\n${p.shipping_address.address?.city}, ${p.shipping_address.address?.state} ${p.shipping_address.address?.postal_code}\n${p.shipping_address.address?.country}`;
+                                  navigator.clipboard.writeText(addr);
+                                  alert("Shipping address copied to clipboard!");
+                                }}
+                                style={{ 
+                                  marginTop: "1rem",
+                                  background: "transparent", 
+                                  color: "var(--accent-color)", 
+                                  border: "1px solid var(--accent-color)", 
+                                  padding: "0.4rem 0.8rem", 
+                                  cursor: "pointer", 
+                                  fontSize: "0.8rem",
+                                  fontFamily: "var(--font-heading)"
+                                }}
+                              >
+                                Copy Address to Clipboard
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ padding: "2rem", background: "#0a0a0c", border: "1px solid #333", textAlign: "center" }}>
+              <p style={{ fontStyle: "italic", color: "#666" }}>No transactions match your criteria.</p>
+            </div>
+          )
+        ) : (
+          <div style={{ padding: "2rem", background: "#0a0a0c", border: "1px solid #333", textAlign: "center" }}>
+            <p style={{ fontStyle: "italic", color: "#666" }}>No transactions recorded yet.</p>
+          </div>
+        )}
       </div>
 
       {/* ─── NEWSLETTER SUBSCRIBERS ─── */}
