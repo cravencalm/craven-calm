@@ -161,6 +161,7 @@ export default function AdminDashboard() {
   const [purchaseSearch, setPurchaseSearch] = useState("");
   const [purchaseFilter, setPurchaseFilter] = useState<"all" | "physical" | "digital">("all");
   const [expandedPurchaseId, setExpandedPurchaseId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
@@ -187,6 +188,29 @@ export default function AdminDashboard() {
     const { data } = await supabase.from("purchases").select("*").order("created_at", { ascending: false });
     if (data) setPurchases(data);
     setPurchasesLoading(false);
+  };
+
+  const handleSyncPurchases = async () => {
+    if (!session?.access_token) return;
+    setSyncing(true);
+    try {
+      const response = await fetch("/api/admin/sync-purchases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: session.access_token })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert(`Successfully synced ${data.synced} past purchases from Stripe!`);
+        fetchPurchases();
+      } else {
+        alert(`Failed to sync purchases: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const fetchProducts = async () => {
@@ -1277,10 +1301,31 @@ export default function AdminDashboard() {
 
       {/* ─── PURCHASE HISTORY ─── */}
       <div style={{ marginTop: "4rem", borderTop: "2px solid var(--border-color)", paddingTop: "2.5rem" }}>
-        <h2 style={{ marginBottom: "0.5rem" }}>🛍️ Purchase History</h2>
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, marginBottom: "1.5rem", fontSize: "0.95rem" }}>
-          Track sales and transactions made on the storefront.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1.5rem" }}>
+          <div>
+            <h2 style={{ marginBottom: "0.5rem" }}>🛍️ Purchase History</h2>
+            <p style={{ fontFamily: "var(--font-body)", color: "var(--text-color)", opacity: 0.7, margin: 0, fontSize: "0.95rem" }}>
+              Track sales and transactions made on the storefront.
+            </p>
+          </div>
+          <button 
+            type="button"
+            onClick={handleSyncPurchases}
+            disabled={syncing}
+            style={{
+              background: "transparent",
+              color: "var(--accent-color)",
+              border: "1px solid var(--accent-color)",
+              padding: "0.5rem 1rem",
+              cursor: "pointer",
+              fontFamily: "var(--font-heading)",
+              fontSize: "0.8rem",
+              transition: "all 0.2s"
+            }}
+          >
+            {syncing ? "Syncing..." : "Sync Stripe Purchases"}
+          </button>
+        </div>
 
         {/* STATS OVERVIEW */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
