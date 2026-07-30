@@ -162,6 +162,7 @@ export default function AdminDashboard() {
   const [purchaseFilter, setPurchaseFilter] = useState<"all" | "physical" | "digital">("all");
   const [expandedPurchaseId, setExpandedPurchaseId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [largeText, setLargeText] = useState(true);
 
   // Auth state
   const [session, setSession] = useState<Session | null>(null);
@@ -760,12 +761,47 @@ export default function AdminDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  const inputStyle: React.CSSProperties = { width: "100%", padding: "0.5rem", background: "#111", color: "#fff", border: "1px solid var(--border-color)" };
+  const inputStyle: React.CSSProperties = { 
+    width: "100%", 
+    padding: largeText ? "0.8rem" : "0.5rem", 
+    background: "#111", 
+    color: "#fff", 
+    border: "1px solid var(--border-color)",
+    fontSize: largeText ? "1.15rem" : "0.95rem"
+  };
 
   if (!session) {
     return (
-      <div style={{ padding: "4rem", maxWidth: "500px", margin: "0 auto", fontFamily: "var(--font-heading)", color: "var(--text-color)" }}>
-        <a href="/" style={{ display: "inline-block", color: "var(--accent-color)", textDecoration: "none", marginBottom: "2rem", fontFamily: "var(--font-body)", fontStyle: "italic" }}>← Return to Storefront</a>
+      <div className="admin-container" style={{ padding: "4rem", maxWidth: "500px", margin: "0 auto", fontFamily: "var(--font-heading)", color: "var(--text-color)" }}>
+        {largeText && (
+          <style dangerouslySetInnerHTML={{ __html: `
+            .admin-container h2 { font-size: 2.4rem !important; margin-bottom: 1rem !important; }
+            .admin-container h3 { font-size: 1.9rem !important; margin-bottom: 1.2rem !important; }
+            .admin-container p, .admin-container label, .admin-container button, .admin-container input, .admin-container select, .admin-container textarea { font-size: 1.25rem !important; line-height: 1.6 !important; }
+            .admin-container td, .admin-container th { font-size: 1.15rem !important; padding: 1.2rem !important; }
+            .admin-container span { font-size: 1.1rem !important; }
+            .admin-container code { font-size: 1.1rem !important; }
+            .admin-container .btn-action { font-size: 1.25rem !important; padding: 1rem 2rem !important; }
+            .admin-container input[type="file"] { font-size: 1.1rem !important; }
+          ` }} />
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+          <a href="/" style={{ display: "inline-block", color: "var(--accent-color)", textDecoration: "none", fontFamily: "var(--font-body)", fontStyle: "italic" }}>← Return to Storefront</a>
+          <button 
+            type="button"
+            onClick={() => setLargeText(!largeText)} 
+            style={{ 
+              background: "transparent", 
+              color: "var(--accent-color)", 
+              border: "1px solid var(--accent-color)", 
+              padding: "0.4rem 1rem", 
+              cursor: "pointer", 
+              fontFamily: "var(--font-heading)"
+            }}
+          >
+            {largeText ? "👁️ Standard Text" : "👁️ Larger Text"}
+          </button>
+        </div>
         <div style={{ background: "var(--card-bg)", padding: "2rem", border: "1px solid var(--border-color)", boxShadow: "0 10px 30px rgba(0,0,0,0.8)" }}>
           <h2 style={{ marginBottom: "1rem" }}>Admin Login</h2>
           <form onSubmit={handleAuth} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -788,10 +824,38 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={{ padding: "4rem", maxWidth: "800px", margin: "0 auto", fontFamily: "var(--font-heading)", color: "var(--text-color)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+    <div className="admin-container" style={{ padding: "4rem", maxWidth: largeText ? "1050px" : "800px", margin: "0 auto", fontFamily: "var(--font-heading)", color: "var(--text-color)" }}>
+      {largeText && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          .admin-container h2 { font-size: 2.4rem !important; margin-bottom: 1rem !important; }
+          .admin-container h3 { font-size: 1.9rem !important; margin-bottom: 1.2rem !important; }
+          .admin-container p, .admin-container label, .admin-container button, .admin-container input, .admin-container select, .admin-container textarea { font-size: 1.25rem !important; line-height: 1.6 !important; }
+          .admin-container td, .admin-container th { font-size: 1.15rem !important; padding: 1.2rem !important; }
+          .admin-container span { font-size: 1.1rem !important; }
+          .admin-container code { font-size: 1.1rem !important; }
+          .admin-container .btn-action { font-size: 1.25rem !important; padding: 1rem 2rem !important; }
+          .admin-container input[type="file"] { font-size: 1.1rem !important; }
+        ` }} />
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
         <a href="/" style={{ display: "inline-block", color: "var(--accent-color)", textDecoration: "none", fontFamily: "var(--font-body)", fontStyle: "italic" }}>← Return to Storefront</a>
-        <button onClick={handleLogout} style={{ background: "transparent", color: "var(--text-color)", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer", fontFamily: "var(--font-heading)" }}>Sign Out</button>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <button 
+            type="button"
+            onClick={() => setLargeText(!largeText)} 
+            style={{ 
+              background: "transparent", 
+              color: "var(--accent-color)", 
+              border: "1px solid var(--accent-color)", 
+              padding: "0.4rem 1rem", 
+              cursor: "pointer", 
+              fontFamily: "var(--font-heading)"
+            }}
+          >
+            {largeText ? "👁️ Standard Text" : "👁️ Larger Text"}
+          </button>
+          <button onClick={handleLogout} style={{ background: "transparent", color: "var(--text-color)", border: "1px solid #444", padding: "0.4rem 1rem", cursor: "pointer", fontFamily: "var(--font-heading)" }}>Sign Out</button>
+        </div>
       </div>
 
       <h2>Craven Calm — Content Management System</h2>
