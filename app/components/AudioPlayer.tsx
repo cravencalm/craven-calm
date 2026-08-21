@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { resolveAudioUrl } from "@/lib/audioUtils";
 
 interface Track {
   name: string;
@@ -14,8 +15,12 @@ interface AudioPlayerProps {
 }
 
 export default function AudioPlayer({ src, tracks = [] }: AudioPlayerProps) {
-  // Normalize tracks: if only src is provided, wrap it in a track object
-  const playlist: Track[] = tracks.length > 0 ? tracks : src ? [{ name: "Preview", url: src }] : [];
+  // Normalize tracks: if only src is provided, wrap it in a track object, resolving any broken URLs
+  const rawPlaylist: Track[] = tracks.length > 0 ? tracks : src ? [{ name: "Preview", url: src }] : [];
+  const playlist: Track[] = rawPlaylist.map((t) => ({
+    ...t,
+    url: resolveAudioUrl(t.url, t.name),
+  }));
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);

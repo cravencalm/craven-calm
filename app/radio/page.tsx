@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { supabase } from "@/lib/supabase";
+import { resolveAudioUrl } from "@/lib/audioUtils";
 
 interface RadioTrack {
   name: string;
@@ -17,40 +18,94 @@ interface RadioTrack {
 
 const DEFAULT_SANCTUARY_TRACKS: RadioTrack[] = [
   {
-    name: "Candlelit Nocturne in A Minor",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    name: "Spellcaster",
+    url: "https://completecritter.co.uk/uploads/1787058118_Complete_Critter_-_Spellcaster.mp3",
     albumId: 101,
-    albumName: "Candlelit Reprieve",
-    albumImage: "/assets/candlelit_reprieve_1775280300978.png",
-    priceCents: 1299,
-    category: "Gothic Piano, Ambient",
-  },
-  {
-    name: "Abyssal Echoes & Shadow Frequencies",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    albumId: 102,
-    albumName: "Abyssal Stillness",
-    albumImage: "/assets/abyssal_stillness_1775280329718.png",
-    priceCents: 1499,
-    category: "Dark Academia, Drone",
-  },
-  {
-    name: "Scholar's Midnight Solitude",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    albumId: 103,
-    albumName: "Scholar's Focus",
-    albumImage: "/assets/scholars_focus_1775280317109.png",
-    priceCents: 1199,
-    category: "Neoclassical, Study",
-  },
-  {
-    name: "Celestial Shadows of the Cathedral",
-    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-    albumId: 104,
-    albumName: "Celestial Stillness",
+    albumName: "Spellcaster",
     albumImage: "/assets/album_art_1_1775220324510.png",
-    priceCents: 1599,
-    category: "Ethereal Choirs, Sanctuary",
+    priceCents: 499,
+    category: "Hip Hop, UK Rap",
+  },
+  {
+    name: "Child Of The Corn",
+    url: "https://completecritter.co.uk/uploads/1786120630_Complete_Critter_-_Child_Of_The_Corn.mp3",
+    albumId: 102,
+    albumName: "Child Of The Corn",
+    albumImage: "/assets/album_art_2_1775220324510.png",
+    priceCents: 199,
+    category: "Hip Hop, UK Rap",
+  },
+  {
+    name: "So What?",
+    url: "https://completecritter.co.uk/uploads/1787058877_Complete_Critter_-_So_What.mp3",
+    albumId: 103,
+    albumName: "Spellcaster",
+    albumImage: "/assets/album_art_1_1775220324510.png",
+    priceCents: 499,
+    category: "Hip Hop, UK Rap",
+  },
+  {
+    name: "Crazy",
+    url: "https://completecritter.co.uk/uploads/1787058878_Compelte_Critter_-_Crazy.mp3",
+    albumId: 104,
+    albumName: "Spellcaster",
+    albumImage: "/assets/album_art_1_1775220324510.png",
+    priceCents: 499,
+    category: "Hip Hop, UK Rap",
+  },
+  {
+    name: "Complete Critter",
+    url: "https://completecritter.co.uk/uploads/1787058879_Complete_Critter_-_Complete_Critter.mp3",
+    albumId: 105,
+    albumName: "Spellcaster",
+    albumImage: "/assets/album_art_1_1775220324510.png",
+    priceCents: 499,
+    category: "Hip Hop, UK Rap",
+  },
+  {
+    name: "Dark Calm - Session 1",
+    url: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/8sj6j9j9cf_1775559294046.mp3",
+    albumId: 106,
+    albumName: "Dark Calm Session 1",
+    albumImage: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/rhrqj1wju5a_1775559282929.png",
+    priceCents: 200,
+    category: "Gothic, Sanctuary",
+  },
+  {
+    name: "Dark Calm - Session 2",
+    url: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/ww85dxqerce_1775720715108.mp3",
+    albumId: 107,
+    albumName: "Dark Calm Session 2",
+    albumImage: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/3a8e4tqulfc_1775720324292.jpg",
+    priceCents: 200,
+    category: "Gothic, Sleep",
+  },
+  {
+    name: "Gothic Meditation - Volume 1",
+    url: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/160s7b0hwey_1776506557261.mp3",
+    albumId: 108,
+    albumName: "Gothic Meditation - Volume 1",
+    albumImage: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/6fwmj0vierr_1776506554531.png",
+    priceCents: 200,
+    category: "Gothic, Meditation",
+  },
+  {
+    name: "Gothic Meditation - Volume 2",
+    url: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/78g9965doyd_1776687690220.mp3",
+    albumId: 109,
+    albumName: "Gothic Meditation - Volume 2",
+    albumImage: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/wxmrk39eay_1776687620772.png",
+    priceCents: 200,
+    category: "Gothic, Meditation",
+  },
+  {
+    name: "Oceanside",
+    url: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/tzy3lzz1eal_1775840041288.mp3",
+    albumId: 110,
+    albumName: "Oceanside",
+    albumImage: "https://fehhmbyyslfdwstgqeee.supabase.co/storage/v1/object/public/products_media/products/0h9ba9fmmhqj_1775838957923.png",
+    priceCents: 200,
+    category: "Sleep Relaxation, Meditation",
   },
 ];
 
@@ -103,23 +158,22 @@ export default function SanctuaryRadioPage() {
           data.forEach((product: any) => {
             if (product.tracks && Array.isArray(product.tracks)) {
               product.tracks.forEach((track: any) => {
-                // Filter out broken Hostinger URLs if present, preferring reliable tracks
-                if (track.url && !track.url.includes("hostingersite.com")) {
-                  fetchedTracks.push({
-                    name: track.name || product.name || "Untitled Track",
-                    url: track.url,
-                    albumId: product.id,
-                    albumName: product.name,
-                    albumImage: product.image_url || "/assets/album_art_1_1775220324510.png",
-                    priceCents: product.price_cents,
-                    category: product.category,
-                  });
-                }
+                const finalUrl = resolveAudioUrl(track.url, track.name || product.name, product.category);
+                fetchedTracks.push({
+                  name: track.name || product.name || "Untitled Track",
+                  url: finalUrl,
+                  albumId: product.id,
+                  albumName: product.name,
+                  albumImage: product.image_url || "/assets/album_art_1_1775220324510.png",
+                  priceCents: product.price_cents,
+                  category: product.category,
+                });
               });
-            } else if (product.mp3_preview_url && !product.mp3_preview_url.includes("hostingersite.com")) {
+            } else if (product.mp3_preview_url || product.name) {
+              const finalUrl = resolveAudioUrl(product.mp3_preview_url, product.name, product.category);
               fetchedTracks.push({
                 name: `${product.name} (Preview)`,
-                url: product.mp3_preview_url,
+                url: finalUrl,
                 albumId: product.id,
                 albumName: product.name,
                 albumImage: product.image_url || "/assets/album_art_1_1775220324510.png",
