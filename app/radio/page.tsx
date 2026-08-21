@@ -15,9 +15,48 @@ interface RadioTrack {
   category?: string | null;
 }
 
+const DEFAULT_SANCTUARY_TRACKS: RadioTrack[] = [
+  {
+    name: "Candlelit Nocturne in A Minor",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    albumId: 101,
+    albumName: "Candlelit Reprieve",
+    albumImage: "/assets/candlelit_reprieve_1775280300978.png",
+    priceCents: 1299,
+    category: "Gothic Piano, Ambient",
+  },
+  {
+    name: "Abyssal Echoes & Shadow Frequencies",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    albumId: 102,
+    albumName: "Abyssal Stillness",
+    albumImage: "/assets/abyssal_stillness_1775280329718.png",
+    priceCents: 1499,
+    category: "Dark Academia, Drone",
+  },
+  {
+    name: "Scholar's Midnight Solitude",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    albumId: 103,
+    albumName: "Scholar's Focus",
+    albumImage: "/assets/scholars_focus_1775280317109.png",
+    priceCents: 1199,
+    category: "Neoclassical, Study",
+  },
+  {
+    name: "Celestial Shadows of the Cathedral",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+    albumId: 104,
+    albumName: "Celestial Stillness",
+    albumImage: "/assets/album_art_1_1775220324510.png",
+    priceCents: 1599,
+    category: "Ethereal Choirs, Sanctuary",
+  },
+];
+
 export default function SanctuaryRadioPage() {
-  const [tracks, setTracks] = useState<RadioTrack[]>([]);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(-1);
+  const [tracks, setTracks] = useState<RadioTrack[]>(DEFAULT_SANCTUARY_TRACKS);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [volume, setVolume] = useState<number>(0.8);
@@ -26,12 +65,13 @@ export default function SanctuaryRadioPage() {
   const [currentTime, setCurrentTime] = useState<string>("0:00");
   const [duration, setDuration] = useState<string>("0:00");
   const [history, setHistory] = useState<RadioTrack[]>([]);
-  
+  const [streamError, setStreamError] = useState<string | null>(null);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Parse time utility
   const formatTime = (secs: number) => {
-    if (isNaN(secs)) return "0:00";
+    if (isNaN(secs) || !isFinite(secs)) return "0:00";
     const m = Math.floor(secs / 60);
     const s = Math.floor(secs % 60);
     return `${m}:${s < 10 ? "0" : ""}${s}`;
@@ -58,14 +98,15 @@ export default function SanctuaryRadioPage() {
 
         if (error) throw error;
 
-        if (data) {
-          const allTracks: RadioTrack[] = [];
+        if (data && data.length > 0) {
+          const fetchedTracks: RadioTrack[] = [];
           data.forEach((product: any) => {
             if (product.tracks && Array.isArray(product.tracks)) {
               product.tracks.forEach((track: any) => {
-                if (track.url) {
-                  allTracks.push({
-                    name: track.name || "Untitled Track",
+                // Filter out broken Hostinger URLs if present, preferring reliable tracks
+                if (track.url && !track.url.includes("hostingersite.com")) {
+                  fetchedTracks.push({
+                    name: track.name || product.name || "Untitled Track",
                     url: track.url,
                     albumId: product.id,
                     albumName: product.name,
@@ -75,8 +116,8 @@ export default function SanctuaryRadioPage() {
                   });
                 }
               });
-            } else if (product.mp3_preview_url) {
-              allTracks.push({
+            } else if (product.mp3_preview_url && !product.mp3_preview_url.includes("hostingersite.com")) {
+              fetchedTracks.push({
                 name: `${product.name} (Preview)`,
                 url: product.mp3_preview_url,
                 albumId: product.id,
@@ -88,14 +129,13 @@ export default function SanctuaryRadioPage() {
             }
           });
 
-          if (allTracks.length > 0) {
-            const shuffled = shuffleArray(allTracks);
-            setTracks(shuffled);
-            setCurrentTrackIndex(0);
-          }
+          // Combine with default sanctuary tracks to guarantee working audio streams
+          const combinedPlaylist = [...DEFAULT_SANCTUARY_TRACKS, ...fetchedTracks];
+          setTracks(shuffleArray(combinedPlaylist));
+          setCurrentTrackIndex(0);
         }
       } catch (err) {
-        console.error("Failed to load radio playlist:", err);
+        console.warn("Using default sanctuary tracks due to Supabase query response:", err);
       } finally {
         setLoading(false);
       }
@@ -103,12 +143,11 @@ export default function SanctuaryRadioPage() {
     loadRadio();
   }, []);
 
-  const currentTrack = tracks[currentTrackIndex];
+  const currentTrack = tracks[currentTrackIndex] || DEFAULT_SANCTUARY_TRACKS[0];
 
   // Add a track to played history (max 4)
   const addToHistory = useCallback((track: RadioTrack) => {
     setHistory((prev) => {
-      // Don't duplicate the immediate previous entry
       if (prev.length > 0 && prev[0].url === track.url) return prev;
       const filtered = prev.filter((t) => t.url !== track.url);
       return [track, ...filtered].slice(0, 4);
@@ -122,19 +161,25 @@ export default function SanctuaryRadioPage() {
       addToHistory(currentTrack);
     }
     
-    // Pick a new index: either increment or shuffle again
     setCurrentTrackIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
       if (nextIndex >= tracks.length) {
-        // reshuffle to keep it fresh
         const reshuffled = shuffleArray(tracks);
         setTracks(reshuffled);
         return 0;
       }
       return nextIndex;
     });
+    setStreamError(null);
     setIsPlaying(true);
   }, [tracks, currentTrack, addToHistory]);
+
+  // Handle audio loading or network errors gracefully without infinite auto-skipping loops
+  const handleAudioError = useCallback(() => {
+    console.warn("Sanctuary Radio Stream Error on track:", currentTrack?.name);
+    setIsPlaying(false);
+    setStreamError("Audio stream temporarily offline. Click skip ⏭ to try another track.");
+  }, [currentTrack?.name]);
 
   // Play a specific track directly
   const playTrackDirectly = (track: RadioTrack) => {
@@ -143,6 +188,7 @@ export default function SanctuaryRadioPage() {
       if (currentTrack) {
         addToHistory(currentTrack);
       }
+      setStreamError(null);
       setCurrentTrackIndex(idx);
       setIsPlaying(true);
     }
@@ -154,10 +200,13 @@ export default function SanctuaryRadioPage() {
     if (!audio) return;
 
     if (isPlaying) {
-      audio.play().catch((err) => {
-        console.log("Audio autoplay block or failure:", err);
-        setIsPlaying(false);
-      });
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise.catch((err) => {
+          console.warn("Audio play blocked or failed:", err);
+          setIsPlaying(false);
+        });
+      }
     } else {
       audio.pause();
     }
@@ -204,10 +253,9 @@ export default function SanctuaryRadioPage() {
           <audio
             ref={audioRef}
             src={currentTrack.url}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
             onLoadedMetadata={(e) => {
               setDuration(formatTime(e.currentTarget.duration));
+              setStreamError(null);
             }}
             onTimeUpdate={(e) => {
               setCurrentTime(formatTime(e.currentTarget.currentTime));
@@ -216,10 +264,7 @@ export default function SanctuaryRadioPage() {
               }
             }}
             onEnded={handleNext}
-            onError={(e) => {
-              console.log("Audio stream error, skipping...", e);
-              handleNext();
-            }}
+            onError={handleAudioError}
           />
         )}
 
@@ -236,6 +281,7 @@ export default function SanctuaryRadioPage() {
               <div className="now-playing-container">
                 <div className="now-playing-cover-wrapper">
                   <img
+                    key={currentTrack.url}
                     src={currentTrack.albumImage}
                     alt={currentTrack.albumName}
                     className={`now-playing-cover ${isPlaying ? "playing" : ""}`}
@@ -247,6 +293,12 @@ export default function SanctuaryRadioPage() {
                   <span className="track-album-subtitle">Album: {currentTrack.albumName}</span>
                   <h2 className="track-title-large">{currentTrack.name}</h2>
                   
+                  {streamError && (
+                    <div className="stream-error-badge">
+                      <span>⚠️ {streamError}</span>
+                    </div>
+                  )}
+
                   {currentTrack.category && (
                     <div className="track-genres">
                       {currentTrack.category.split(",").map((cat) => (
@@ -398,6 +450,8 @@ export default function SanctuaryRadioPage() {
         </div>
       </main>
 
+      <Footer />
+
       {/* Styled JSX Stylesheet */}
       <style>{`
         .radio-header {
@@ -511,7 +565,7 @@ export default function SanctuaryRadioPage() {
           border: 2px solid rgba(227, 169, 104, 0.4);
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
           filter: sepia(0.2) contrast(1.2) brightness(0.85);
-          transition: transform 0.5s ease;
+          transition: opacity 0.4s ease;
           animation: spin-cover 28s linear infinite paused;
         }
 
@@ -562,6 +616,17 @@ export default function SanctuaryRadioPage() {
           margin: 0 0 0.8rem 0;
           text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
           line-height: 1.25;
+        }
+
+        .stream-error-badge {
+          display: inline-block;
+          background: rgba(220, 53, 69, 0.15);
+          border: 1px solid rgba(220, 53, 69, 0.4);
+          color: #ff6b6b;
+          font-size: 0.85rem;
+          padding: 0.4rem 0.8rem;
+          border-radius: 4px;
+          margin-bottom: 0.8rem;
         }
 
         .track-genres {
