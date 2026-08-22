@@ -663,7 +663,7 @@ export default function SanctuaryRadioPage() {
         }
 
         .track-title-large {
-          font-family: var(--font-heading);
+          font-family: var(--font-subheading);
           font-size: 2.2rem;
           color: var(--accent-color);
           letter-spacing: 0.05em;

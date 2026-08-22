@@ -449,7 +449,8 @@ main {
 }
 
 .product-info h3 {
-    font-size: 1.1rem;
+    font-family: var(--font-subheading);
+    font-size: 1.15rem;
     margin-bottom: 0.3rem;
 }
 

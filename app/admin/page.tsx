@@ -76,6 +76,25 @@ function extractYouTubeId(url: string): string | null {
   return m ? m[1] : null;
 }
 
+function normalizeTitleCase(str: string): string {
+  if (!str) return str;
+  if (str === str.toUpperCase() && str.length > 1) {
+    const minorWords = new Set(["a", "an", "the", "and", "but", "or", "for", "nor", "on", "at", "to", "by", "from", "of", "in", "with", "v", "vs", "via"]);
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((word, index) => {
+        if (!word) return word;
+        if (index > 0 && minorWords.has(word)) {
+          return word;
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(" ");
+  }
+  return str;
+}
+
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -585,8 +604,14 @@ export default function AdminDashboard() {
     }
 
     setStatus("Saving product to database...");
+    const normalizedProductName = normalizeTitleCase(productName.trim());
+    const normalizedTracks = productTracks.map(t => ({
+      ...t,
+      name: normalizeTitleCase(t.name)
+    }));
+
     const payload = { 
-      name: productName, 
+      name: normalizedProductName, 
       price_cents: Math.round(priceNum * 100), 
       youtube_id: youtubeId || null, 
       audio_length: audioLength || null, 
@@ -595,7 +620,7 @@ export default function AdminDashboard() {
       image_url: imageUrl || null,
       is_physical: isPhysical,
       category: selectedCategories.join(","),
-      tracks: productTracks
+      tracks: normalizedTracks
     };
 
     if (editingId) {
